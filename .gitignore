@@ -1,0 +1,8 @@
+# Python data tools
+__pycache__/
+*.py[cod]
+.venv/
+.pytest_cache/
+
+# Excel owner files
+~$*.xlsx
