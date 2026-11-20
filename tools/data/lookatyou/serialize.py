@@ -105,6 +105,13 @@ def _write_version(folder, version, bundle, warnings):
             preview / "locales" / f"{language}.json",
             _locale(schema, version, language, bundle["strings"], reviewed_only=False),
         )
+    for pilot in sorted(
+        bundle.get("pilotDocuments") or [],
+        key=lambda item: (item.get("quizId") or "", item.get("pilotVersion") or ""),
+    ):
+        quiz_id = pilot.get("quizId") or "pilot"
+        pilot_version = pilot.get("pilotVersion") or "pilot"
+        _dump(preview / "pilots" / quiz_id / f"{pilot_version}.json", pilot)
 
     released = [quiz for quiz in quizzes if not quiz.get("releaseReasons")]
     if released:

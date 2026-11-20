@@ -18,6 +18,13 @@ OPTIONAL_SHEETS = {
     "ResultTypeData.xlsx": ("RuleSets", "RuleMappings"),
 }
 
+# 상황 파일럿은 세 시트가 모두 있을 때만 읽는다. 하나도 없으면 기존 입력으로 본다.
+PILOT_SHEETS = (
+    ("QuestionData.xlsx", "Scenarios"),
+    ("QuestionData.xlsx", "ScenarioOptions"),
+    ("Localization.xlsx", "PilotStrings"),
+)
+
 REQUIRED_COLUMNS = {
     ("QuizData.xlsx", "Quizzes"): (
         "QuizId",
@@ -122,12 +129,58 @@ OPTIONAL_COLUMNS = {
     ),
 }
 
+PILOT_COLUMNS = {
+    ("QuestionData.xlsx", "Scenarios"): (
+        "QuizId",
+        "BaseDataVersion",
+        "PilotVersion",
+        "ScenarioId",
+        "SortOrder",
+        "PromptTextKey",
+        "IsActive",
+    ),
+    ("QuestionData.xlsx", "ScenarioOptions"): (
+        "QuizId",
+        "BaseDataVersion",
+        "PilotVersion",
+        "ScenarioId",
+        "OptionId",
+        "SortOrder",
+        "DimensionId",
+        "LabelTextKey",
+    ),
+    ("Localization.xlsx", "PilotStrings"): (
+        "QuizId",
+        "BaseDataVersion",
+        "PilotVersion",
+        "Key",
+        "ko",
+        "en",
+        "ja",
+        "pt-BR",
+        "koStatus",
+        "enStatus",
+        "jaStatus",
+        "pt-BRStatus",
+    ),
+    ("QuestionData.xlsx", "ScenarioOptionScores"): (
+        "QuizId",
+        "BaseDataVersion",
+        "PilotVersion",
+        "ScenarioId",
+        "OptionId",
+        "DimensionId",
+        "Points",
+    ),
+}
+
 
 def read_sources(source_dir):
     """시트별 레코드 목록을 반환한다. 구조 오류는 예외 목록으로 모은다."""
     source_dir = Path(source_dir)
     tables = {}
     errors = []
+    opened = {}
     for filename, sheets in SOURCE_FILES.items():
         path = source_dir / filename
         if not path.is_file():
@@ -138,6 +191,7 @@ def read_sources(source_dir):
         except Exception as error:  # noqa: BLE001 - 파일 단위로 보고한다.
             errors.append(DataError(f"통합 문서를 열 수 없습니다. {error}", file=filename))
             continue
+        opened[filename] = workbook
         try:
             for sheet_name in sheets:
                 if sheet_name not in workbook.sheetnames:
@@ -164,8 +218,39 @@ def read_sources(source_dir):
                 )
                 errors.extend(sheet_errors)
                 tables[(filename, sheet_name)] = records
-        finally:
-            workbook.close()
+        except Exception:
+            for workbook in opened.values():
+                workbook.close()
+            raise
+
+    present_pilots = [
+        (filename, sheet_name)
+        for filename, sheet_name in PILOT_SHEETS
+        if sheet_name in getattr(opened.get(filename), "sheetnames", ())
+    ]
+    if present_pilots and len(present_pilots) != len(PILOT_SHEETS):
+        for filename, sheet_name in PILOT_SHEETS:
+            if sheet_name not in getattr(opened.get(filename), "sheetnames", ()):
+                errors.append(DataError("시트가 없습니다.", file=filename, sheet=sheet_name))
+    elif len(present_pilots) == len(PILOT_SHEETS):
+        for filename, sheet_name in PILOT_SHEETS:
+            records, sheet_errors = _read_sheet(
+                opened[filename][sheet_name], filename, sheet_name
+            )
+            errors.extend(sheet_errors)
+            tables[(filename, sheet_name)] = records
+        question_book = opened.get("QuestionData.xlsx")
+        if question_book is not None and "ScenarioOptionScores" in question_book.sheetnames:
+            records, sheet_errors = _read_sheet(
+                question_book["ScenarioOptionScores"],
+                "QuestionData.xlsx",
+                "ScenarioOptionScores",
+            )
+            errors.extend(sheet_errors)
+            tables[("QuestionData.xlsx", "ScenarioOptionScores")] = records
+
+    for workbook in opened.values():
+        workbook.close()
     return tables, errors
 
 
@@ -193,7 +278,7 @@ def _read_sheet(worksheet, filename, sheet_name):
             break
         header.append(str(cell.value).strip())
 
-    required = REQUIRED_COLUMNS[(filename, sheet_name)]
+    required = REQUIRED_COLUMNS.get((filename, sheet_name)) or PILOT_COLUMNS[(filename, sheet_name)]
     optional = OPTIONAL_COLUMNS.get((filename, sheet_name), ())
     found = [name for name in header if name]
     missing = [name for name in required if name not in found]

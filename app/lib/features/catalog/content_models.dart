@@ -6,6 +6,7 @@ class ContentBundle {
     required this.channel,
     required this.quizzes,
     required this.locales,
+    this.pilots = const [],
   });
 
   final int schemaVersion;
@@ -13,6 +14,26 @@ class ContentBundle {
   final String channel;
   final List<QuizContent> quizzes;
   final Map<String, LocaleCatalog> locales;
+  final List<ScenarioPilot> pilots;
+
+  /// pilotVersion을 비우면 이 번들 버전의 파일럿을 고른다.
+  ScenarioPilot? pilot(String quizId, {String? pilotVersion}) {
+    final matches = [for (final item in pilots) if (item.quizId == quizId) item];
+    if (pilotVersion != null) {
+      for (final item in matches) {
+        if (item.pilotVersion == pilotVersion) {
+          return item;
+        }
+      }
+      return null;
+    }
+    for (final item in matches) {
+      if (item.baseDataVersion == dataVersion) {
+        return item;
+      }
+    }
+    return matches.length == 1 ? matches.single : null;
+  }
 
   QuizContent? quiz(String quizId) {
     for (final item in quizzes) {
@@ -201,6 +222,56 @@ class RuleMapping {
   final String? firstDimensionId;
   final String? secondDimensionId;
   final String resultTypeId;
+}
+
+class ScenarioPilot {
+  const ScenarioPilot({
+    required this.quizId,
+    required this.baseDataVersion,
+    required this.pilotVersion,
+    required this.scenarios,
+    required this.locales,
+    this.scoringMode = 'axis_count',
+  });
+
+  final String quizId;
+  final String baseDataVersion;
+  final String pilotVersion;
+
+  /// axis_count는 선택 횟수, option_points는 축 점수 합이다.
+  final String scoringMode;
+  final List<ScenarioContent> scenarios;
+  final Map<String, LocaleCatalog> locales;
+}
+
+class ScenarioContent {
+  const ScenarioContent({
+    required this.scenarioId,
+    required this.promptTextKey,
+    required this.sortOrder,
+    required this.options,
+  });
+
+  final String scenarioId;
+  final String promptTextKey;
+  final int sortOrder;
+  final List<ScenarioOptionContent> options;
+}
+
+class ScenarioOptionContent {
+  const ScenarioOptionContent({
+    required this.optionId,
+    required this.dimensionId,
+    required this.labelTextKey,
+    required this.sortOrder,
+    this.pointsByDimension = const {},
+  });
+
+  final String optionId;
+  final String dimensionId;
+  final String labelTextKey;
+  final int sortOrder;
+  final Map<String, int> pointsByDimension;
 }
 
 class ResolvedText {

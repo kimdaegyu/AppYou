@@ -1,0 +1,56 @@
+{
+  "completionPolicy": "pending",
+  "dataVersion": "0.5.0",
+  "dimensions": [
+    {
+      "dataVersion": "0.5.0",
+      "dimensionId": "social",
+      "isActive": true,
+      "nameTextKey": "wealth_four.axis.social",
+      "quizId": "wealth_four",
+      "roleTextKey": null,
+      "sortOrder": 1
+    },
+    {
+      "dataVersion": "0.5.0",
+      "dimensionId": "mental",
+      "isActive": true,
+      "nameTextKey": "wealth_four.axis.mental",
+      "quizId": "wealth_four",
+      "roleTextKey": null,
+      "sortOrder": 2
+    },
+    {
+      "dataVersion": "0.5.0",
+      "dimensionId": "physical",
+      "isActive": true,
+      "nameTextKey": "wealth_four.axis.physical",
+      "quizId": "wealth_four",
+      "roleTextKey": null,
+      "sortOrder": 3
+    },
+    {
+      "dataVersion": "0.5.0",
+      "dimensionId": "financial",
+      "isActive": true,
+      "nameTextKey": "wealth_four.axis.financial",
+      "quizId": "wealth_four",
+      "roleTextKey": null,
+      "sortOrder": 4
+    }
+  ],
+  "introTextKey": "wealth_four.intro",
+  "isActive": false,
+  "options": [],
+  "questionCount": 0,
+  "questions": [],
+  "quizId": "wealth_four",
+  "resultRuleStatus": "pending",
+  "resultTemplateId": "wealth_profile",
+  "resultTypes": [],
+  "rule": null,
+  "schemaVersion": 2,
+  "scoreMode": "pending",
+  "sortOrder": 2,
+  "titleTextKey": "wealth_four.title"
+}

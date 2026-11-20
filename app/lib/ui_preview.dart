@@ -1,3 +1,6 @@
+import 'dart:convert';
+
+import 'package:flutter/services.dart';
 import 'package:material_ui/material_ui.dart';
 
 import 'core/fonts/app_font_loader.dart';
@@ -9,6 +12,7 @@ import 'features/catalog/content_repository.dart';
 import 'features/catalog/content_scope.dart';
 import 'features/catalog/content_text.dart';
 import 'features/quiz/quiz_engine.dart';
+import 'features/quiz/quiz_scenario.dart';
 import 'features/quiz/quiz_session.dart';
 import 'shared/widgets/app_button.dart';
 import 'shared/widgets/app_card.dart';
@@ -229,8 +233,12 @@ class _UiPreviewPageState extends State<UiPreviewPage> {
   int? _catalogSelected;
   QuizSession? _pilot;
   QuizOutcome? _pilotOutcome;
+  ScenarioSession? _scenarios;
+  ScenarioTally? _scenarioTally;
+  String? _pilotRecord;
   String? _pilotError;
   var _pilotStarted = false;
+  var _inScenarios = false;
 
   @override
   Widget build(BuildContext context) {
@@ -458,7 +466,7 @@ class _UiPreviewPageState extends State<UiPreviewPage> {
                     style: roles.body.copyWith(fontWeight: step.$2),
                   ),
                 const SizedBox(height: AppSpacing.sectionGap),
-                ..._catalogSection(context, code, roles),
+                ..._catalogSection(context, code, roles, showSampleEnding: _pilotOutcome == null),
                 ..._pilotSection(code, roles),
               ],
             ),
@@ -471,8 +479,9 @@ class _UiPreviewPageState extends State<UiPreviewPage> {
   List<Widget> _catalogSection(
     BuildContext context,
     String code,
-    AppTextRoles roles,
-  ) {
+    AppTextRoles roles, {
+    bool showSampleEnding = true,
+  }) {
     final bundle = ContentScope.of(context);
     final book = AppTextBook(bundle.locales);
     final quiz = bundle.quiz('life_tactics');
@@ -483,9 +492,6 @@ class _UiPreviewPageState extends State<UiPreviewPage> {
       ..sort((a, b) => a.sortOrder.compareTo(b.sortOrder)))
         .first;
     final answers = quiz.optionsFor(question.scaleId);
-    final result = quiz.resultTypes.firstWhere(
-      (item) => item.resultTypeId == 'tr10',
-    );
     final title = book.resolve(code, quiz.titleTextKey);
     final review = title.usedFallback
         ? (code == 'ko'
@@ -537,19 +543,27 @@ class _UiPreviewPageState extends State<UiPreviewPage> {
         label: book.resolve(code, 'common.ui.quiz.next').text,
         onPressed: () {},
       ),
-      const SizedBox(height: AppSpacing.stackGap),
-      Text(
-        book.resolve(code, result.nameTextKey).text,
-        key: const Key('catalog-result'),
-        style: roles.resultName,
-      ),
-      Text(result.formation, style: roles.secondary),
-      const SizedBox(height: AppSpacing.stackGap),
-      Text(
-        book.resolve(code, 'common.saida.start').text,
-        key: const Key('catalog-saida'),
-        style: roles.saida,
-      ),
+      if (showSampleEnding) ...[
+        const SizedBox(height: AppSpacing.stackGap),
+        Text(
+          book.resolve(
+            code,
+            quiz.resultTypes.firstWhere((item) => item.resultTypeId == 'tr10').nameTextKey,
+          ).text,
+          key: const Key('catalog-result'),
+          style: roles.resultName,
+        ),
+        Text(
+          quiz.resultTypes.firstWhere((item) => item.resultTypeId == 'tr10').formation,
+          style: roles.secondary,
+        ),
+        const SizedBox(height: AppSpacing.stackGap),
+        Text(
+          book.resolve(code, 'common.saida.start').text,
+          key: const Key('catalog-saida'),
+          style: roles.saida,
+        ),
+      ],
     ];
   }
 
@@ -560,14 +574,23 @@ class _UiPreviewPageState extends State<UiPreviewPage> {
       return const [];
     }
     final session = _pilot ??= QuizSession.start(quiz, allowPending: true);
+    final scenarioPilot = bundle.pilot(quiz.quizId);
     final book = AppTextBook(bundle.locales);
     final questions = activeQuestions(quiz);
     final position = questions.indexWhere((item) => item.questionId == session.positionId);
     final question = questions[position < 0 ? 0 : position];
     final options = quiz.optionsFor(question.scaleId);
+    final axisOrder = [
+      for (final item in ([...quiz.dimensions]..sort((a, b) => a.sortOrder.compareTo(b.sortOrder))))
+        if (item.isActive) item.dimensionId,
+    ];
 
     String text(String key, {Map<String, Object?> values = const {}}) {
       return book.resolve(code, key, values: values).text;
+    }
+
+    String axisName(String id) {
+      return text(quiz.dimensions.firstWhere((item) => item.dimensionId == id).nameTextKey);
     }
 
     if (_pilotOutcome != null) {
@@ -575,9 +598,13 @@ class _UiPreviewPageState extends State<UiPreviewPage> {
       final result = quiz.resultTypes.firstWhere(
         (item) => item.resultTypeId == outcome.resultTypeId,
       );
-      final tied = outcome.tiedDimensionIds
-          .map((id) => text(quiz.dimensions.firstWhere((item) => item.dimensionId == id).nameTextKey))
-          .join(' · ');
+      final tied = outcome.tiedDimensionIds.map(axisName).join(' · ');
+      final tally = _scenarioTally;
+      final scenarioBook = scenarioPilot == null ? null : AppTextBook(scenarioPilot.locales);
+      String scenarioText(String key, {Map<String, Object?> values = const {}}) {
+        return scenarioBook!.resolve(code, key, values: values).text;
+      }
+
       return [
         const SizedBox(height: AppSpacing.sectionGap),
         _SectionTitle(code == 'ko' ? '파일럿 결과' : 'Pilot result'),
@@ -586,7 +613,7 @@ class _UiPreviewPageState extends State<UiPreviewPage> {
         Text(text('common.ui.result.axes'), style: roles.secondary),
         for (final axis in outcome.rank)
           Text(
-            '${text(quiz.dimensions.firstWhere((item) => item.dimensionId == axis).nameTextKey)} ${outcome.displayScores[axis]}',
+            '${axisName(axis)} ${outcome.displayScores[axis]}',
             key: Key('pilot-score-$axis'),
             style: roles.body,
           ),
@@ -597,7 +624,7 @@ class _UiPreviewPageState extends State<UiPreviewPage> {
         ],
         if (outcome.path == 'balance') ...[
           const SizedBox(height: AppSpacing.stackGap),
-          Text(text('life_tactics.result.balance.note'), style: roles.body),
+          Text(text('life_tactics.result.balance.note'), key: const Key('pilot-reason'), style: roles.body),
         ],
         if (outcome.adjacentChanges) ...[
           const SizedBox(height: AppSpacing.stackGap),
@@ -606,6 +633,35 @@ class _UiPreviewPageState extends State<UiPreviewPage> {
         const SizedBox(height: AppSpacing.stackGap),
         Text(text(result.nameTextKey), key: const Key('pilot-result'), style: roles.resultName),
         Text(result.formation, key: const Key('pilot-formation'), style: roles.secondary),
+        if (tally != null && scenarioBook != null) ...[
+          const SizedBox(height: AppSpacing.sectionGap),
+          Text(scenarioText('life_tactics.scenario.ui.summary'), key: const Key('pilot-scenario-summary-title'), style: roles.secondary),
+          for (final axis in axisOrder)
+            Text(
+              scenarioText(
+                'life_tactics.scenario.ui.count',
+                values: {'axis': axisName(axis), 'count': tally.counts[axis] ?? 0},
+              ),
+              key: Key('pilot-scenario-count-$axis'),
+              style: roles.body,
+            ),
+          const SizedBox(height: AppSpacing.stackGap),
+          Text(
+            scenarioText(
+              tally.kind == 'balanced'
+                  ? 'life_tactics.scenario.ui.balanced'
+                  : tally.kind == 'tie'
+                  ? 'life_tactics.scenario.ui.tie'
+                  : 'life_tactics.scenario.ui.lead',
+              values: {
+                'axis': tally.leaders.isEmpty ? '' : axisName(tally.leaders.first),
+                'axes': tally.leaders.map(axisName).join(' · '),
+              },
+            ),
+            key: const Key('pilot-scenario-summary'),
+            style: roles.body,
+          ),
+        ],
         const SizedBox(height: AppSpacing.stackGap),
         AppButton(
           key: const Key('pilot-retry'),
@@ -613,9 +669,117 @@ class _UiPreviewPageState extends State<UiPreviewPage> {
           onPressed: () => setState(() {
             session.answers.clear();
             session.moveTo(questions.first.questionId);
+            _scenarios = null;
+            _scenarioTally = null;
+            _pilotRecord = null;
             _pilotOutcome = null;
+            _pilotError = null;
             _pilotStarted = false;
+            _inScenarios = false;
           }),
+        ),
+        if (_pilotRecord != null) ...[
+          const SizedBox(height: AppSpacing.sectionGap),
+          _SectionTitle(code == 'ko' ? '개발 기록' : 'Dev log'),
+          Text(_pilotRecord!, key: const Key('pilot-record'), style: roles.secondary),
+          const SizedBox(height: AppSpacing.stackGap),
+          AppButton(
+            key: const Key('pilot-copy'),
+            label: code == 'ko' ? '기록 복사' : 'Copy record',
+            onPressed: () {
+              Clipboard.setData(ClipboardData(text: _pilotRecord!));
+            },
+          ),
+        ],
+      ];
+    }
+
+    if (_inScenarios && scenarioPilot != null) {
+      final scenarios = _scenarios ??= ScenarioSession.start(scenarioPilot);
+      final scenarioBook = AppTextBook(scenarioPilot.locales);
+      final index = scenarioPilot.scenarios.indexWhere((item) => item.scenarioId == scenarios.positionId);
+      final scenario = scenarioPilot.scenarios[index < 0 ? 0 : index];
+      final scenarioOptions = [...scenario.options]..sort((a, b) => a.sortOrder.compareTo(b.sortOrder));
+      String scenarioText(String key, {Map<String, Object?> values = const {}}) {
+        return scenarioBook.resolve(code, key, values: values).text;
+      }
+      final last = index == scenarioPilot.scenarios.length - 1;
+      return [
+        const SizedBox(height: AppSpacing.sectionGap),
+        _SectionTitle(scenarioText('life_tactics.scenario.ui.title')),
+        Text(scenarioText('life_tactics.scenario.ui.intro'), style: roles.secondary),
+        const SizedBox(height: AppSpacing.stackGap),
+        AppProgress(
+          current: index + 1,
+          total: scenarioPilot.scenarios.length,
+          label: scenarioText(
+            'life_tactics.scenario.ui.progress',
+            values: {'current': index + 1, 'total': scenarioPilot.scenarios.length},
+          ),
+        ),
+        const SizedBox(height: AppSpacing.stackGap),
+        Text(scenarioText(scenario.promptTextKey), key: const Key('pilot-scenario-prompt'), style: roles.question),
+        const SizedBox(height: AppSpacing.stackGap),
+        for (var optionIndex = 0; optionIndex < scenarioOptions.length; optionIndex++) ...[
+          AppChoiceOption(
+            key: Key('pilot-scenario-choice-$optionIndex'),
+            label: scenarioText(scenarioOptions[optionIndex].labelTextKey),
+            selected: scenarios.answers[scenario.scenarioId] == scenarioOptions[optionIndex].optionId,
+            onPressed: () => setState(() {
+              scenarios.select(scenario.scenarioId, scenarioOptions[optionIndex].optionId);
+              _pilotError = null;
+            }),
+          ),
+          if (optionIndex != scenarioOptions.length - 1) const SizedBox(height: AppSpacing.optionGap),
+        ],
+        const SizedBox(height: AppSpacing.stackGap),
+        AppButton(
+          key: const Key('pilot-scenario-back'),
+          label: text('common.ui.quiz.back'),
+          onPressed: () => setState(() {
+            if (index <= 0) {
+              _inScenarios = false;
+              session.moveTo(questions.last.questionId);
+              return;
+            }
+            scenarios.moveTo(scenarioPilot.scenarios[index - 1].scenarioId);
+          }),
+        ),
+        const SizedBox(height: AppSpacing.optionGap),
+        AppButton(
+          key: Key(last ? 'pilot-scenario-finish' : 'pilot-scenario-next'),
+          label: last ? scenarioText('life_tactics.scenario.ui.finish') : text('common.ui.quiz.next'),
+          onPressed: scenarios.answers[scenario.scenarioId] == null
+              ? null
+              : () => setState(() {
+                  if (!last) {
+                    scenarios.moveTo(scenarioPilot.scenarios[index + 1].scenarioId);
+                    return;
+                  }
+                  try {
+                    final tally = scenarios.complete(dimensionOrder: axisOrder);
+                    final outcome = session.complete();
+                    _scenarioTally = tally;
+                    _pilotOutcome = outcome;
+                    _inScenarios = false;
+                    _pilotError = null;
+                    _pilotRecord = jsonEncode({
+                      'quizId': quiz.quizId,
+                      'baseDataVersion': quiz.dataVersion,
+                      'ruleVersion': quiz.rule!.ruleVersion,
+                      'pilotVersion': scenarioPilot.pilotVersion,
+                      'answers': session.answers,
+                      'dimensionScores': outcome.displayScores,
+                      'baseResultTypeId': outcome.resultTypeId,
+                      'scenarioAnswers': scenarios.answers,
+                      'scoringMode': scenarioPilot.scoringMode,
+                      'scenarioCounts': tally.counts,
+                    });
+                    debugPrint(_pilotRecord);
+                  } on QuizFailure catch (error) {
+                    _pilotError = error.code;
+                  }
+                }),
         ),
       ];
     }
@@ -636,6 +800,7 @@ class _UiPreviewPageState extends State<UiPreviewPage> {
       ];
     }
 
+    final opensScenarios = scenarioPilot != null && position == questions.length - 1;
     return [
       const SizedBox(height: AppSpacing.sectionGap),
       _SectionTitle(code == 'ko' ? '파일럿' : 'Pilot'),
@@ -660,6 +825,8 @@ class _UiPreviewPageState extends State<UiPreviewPage> {
             session.select(question.questionId, options[index].optionId);
             _pilotError = null;
             _pilotOutcome = null;
+            _scenarioTally = null;
+            _pilotRecord = null;
           }),
         ),
         if (index != options.length - 1) const SizedBox(height: AppSpacing.optionGap),
@@ -674,13 +841,21 @@ class _UiPreviewPageState extends State<UiPreviewPage> {
       ),
       const SizedBox(height: AppSpacing.optionGap),
       AppButton(
-        key: Key(position == questions.length - 1 ? 'pilot-finish' : 'pilot-next'),
-        label: text(position == questions.length - 1 ? 'common.ui.quiz.finish' : 'common.ui.quiz.next'),
+        key: Key(position == questions.length - 1 && !opensScenarios ? 'pilot-finish' : 'pilot-next'),
+        label: text(position == questions.length - 1 && !opensScenarios ? 'common.ui.quiz.finish' : 'common.ui.quiz.next'),
         onPressed: session.answers[question.questionId] == null
             ? null
             : () => setState(() {
                 if (position < questions.length - 1) {
                   session.moveTo(questions[position + 1].questionId);
+                  return;
+                }
+                if (opensScenarios) {
+                  _scenarios ??= ScenarioSession.start(scenarioPilot);
+                  _scenarios!.moveTo(scenarioPilot.scenarios.first.scenarioId);
+                  _inScenarios = true;
+                  _pilotOutcome = null;
+                  _scenarioTally = null;
                   return;
                 }
                 try {

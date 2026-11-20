@@ -1,0 +1,350 @@
+{
+  "baseDataVersion": "0.3.0",
+  "locales": {
+    "en": {
+      "statuses": {
+        "life_tactics.scenario.sc01": "missing",
+        "life_tactics.scenario.sc01.sc01_h": "missing",
+        "life_tactics.scenario.sc01.sc01_m": "missing",
+        "life_tactics.scenario.sc01.sc01_r": "missing",
+        "life_tactics.scenario.sc02": "missing",
+        "life_tactics.scenario.sc02.sc02_h": "missing",
+        "life_tactics.scenario.sc02.sc02_m": "missing",
+        "life_tactics.scenario.sc02.sc02_r": "missing",
+        "life_tactics.scenario.sc03": "missing",
+        "life_tactics.scenario.sc03.sc03_h": "missing",
+        "life_tactics.scenario.sc03.sc03_m": "missing",
+        "life_tactics.scenario.sc03.sc03_r": "missing",
+        "life_tactics.scenario.sc04": "missing",
+        "life_tactics.scenario.sc04.sc04_h": "missing",
+        "life_tactics.scenario.sc04.sc04_m": "missing",
+        "life_tactics.scenario.sc04.sc04_r": "missing",
+        "life_tactics.scenario.sc05": "missing",
+        "life_tactics.scenario.sc05.sc05_h": "missing",
+        "life_tactics.scenario.sc05.sc05_m": "missing",
+        "life_tactics.scenario.sc05.sc05_r": "missing",
+        "life_tactics.scenario.sc06": "missing",
+        "life_tactics.scenario.sc06.sc06_h": "missing",
+        "life_tactics.scenario.sc06.sc06_m": "missing",
+        "life_tactics.scenario.sc06.sc06_r": "missing",
+        "life_tactics.scenario.ui.balanced": "missing",
+        "life_tactics.scenario.ui.count": "missing",
+        "life_tactics.scenario.ui.finish": "missing",
+        "life_tactics.scenario.ui.intro": "missing",
+        "life_tactics.scenario.ui.lead": "missing",
+        "life_tactics.scenario.ui.open": "missing",
+        "life_tactics.scenario.ui.progress": "missing",
+        "life_tactics.scenario.ui.summary": "missing",
+        "life_tactics.scenario.ui.tie": "missing",
+        "life_tactics.scenario.ui.title": "missing"
+      },
+      "strings": {}
+    },
+    "ja": {
+      "statuses": {
+        "life_tactics.scenario.sc01": "missing",
+        "life_tactics.scenario.sc01.sc01_h": "missing",
+        "life_tactics.scenario.sc01.sc01_m": "missing",
+        "life_tactics.scenario.sc01.sc01_r": "missing",
+        "life_tactics.scenario.sc02": "missing",
+        "life_tactics.scenario.sc02.sc02_h": "missing",
+        "life_tactics.scenario.sc02.sc02_m": "missing",
+        "life_tactics.scenario.sc02.sc02_r": "missing",
+        "life_tactics.scenario.sc03": "missing",
+        "life_tactics.scenario.sc03.sc03_h": "missing",
+        "life_tactics.scenario.sc03.sc03_m": "missing",
+        "life_tactics.scenario.sc03.sc03_r": "missing",
+        "life_tactics.scenario.sc04": "missing",
+        "life_tactics.scenario.sc04.sc04_h": "missing",
+        "life_tactics.scenario.sc04.sc04_m": "missing",
+        "life_tactics.scenario.sc04.sc04_r": "missing",
+        "life_tactics.scenario.sc05": "missing",
+        "life_tactics.scenario.sc05.sc05_h": "missing",
+        "life_tactics.scenario.sc05.sc05_m": "missing",
+        "life_tactics.scenario.sc05.sc05_r": "missing",
+        "life_tactics.scenario.sc06": "missing",
+        "life_tactics.scenario.sc06.sc06_h": "missing",
+        "life_tactics.scenario.sc06.sc06_m": "missing",
+        "life_tactics.scenario.sc06.sc06_r": "missing",
+        "life_tactics.scenario.ui.balanced": "missing",
+        "life_tactics.scenario.ui.count": "missing",
+        "life_tactics.scenario.ui.finish": "missing",
+        "life_tactics.scenario.ui.intro": "missing",
+        "life_tactics.scenario.ui.lead": "missing",
+        "life_tactics.scenario.ui.open": "missing",
+        "life_tactics.scenario.ui.progress": "missing",
+        "life_tactics.scenario.ui.summary": "missing",
+        "life_tactics.scenario.ui.tie": "missing",
+        "life_tactics.scenario.ui.title": "missing"
+      },
+      "strings": {}
+    },
+    "ko": {
+      "statuses": {
+        "life_tactics.scenario.sc01": "draft",
+        "life_tactics.scenario.sc01.sc01_h": "draft",
+        "life_tactics.scenario.sc01.sc01_m": "draft",
+        "life_tactics.scenario.sc01.sc01_r": "draft",
+        "life_tactics.scenario.sc02": "draft",
+        "life_tactics.scenario.sc02.sc02_h": "draft",
+        "life_tactics.scenario.sc02.sc02_m": "draft",
+        "life_tactics.scenario.sc02.sc02_r": "draft",
+        "life_tactics.scenario.sc03": "draft",
+        "life_tactics.scenario.sc03.sc03_h": "draft",
+        "life_tactics.scenario.sc03.sc03_m": "draft",
+        "life_tactics.scenario.sc03.sc03_r": "draft",
+        "life_tactics.scenario.sc04": "draft",
+        "life_tactics.scenario.sc04.sc04_h": "draft",
+        "life_tactics.scenario.sc04.sc04_m": "draft",
+        "life_tactics.scenario.sc04.sc04_r": "draft",
+        "life_tactics.scenario.sc05": "draft",
+        "life_tactics.scenario.sc05.sc05_h": "draft",
+        "life_tactics.scenario.sc05.sc05_m": "draft",
+        "life_tactics.scenario.sc05.sc05_r": "draft",
+        "life_tactics.scenario.sc06": "draft",
+        "life_tactics.scenario.sc06.sc06_h": "draft",
+        "life_tactics.scenario.sc06.sc06_m": "draft",
+        "life_tactics.scenario.sc06.sc06_r": "draft",
+        "life_tactics.scenario.ui.balanced": "draft",
+        "life_tactics.scenario.ui.count": "draft",
+        "life_tactics.scenario.ui.finish": "draft",
+        "life_tactics.scenario.ui.intro": "draft",
+        "life_tactics.scenario.ui.lead": "draft",
+        "life_tactics.scenario.ui.open": "draft",
+        "life_tactics.scenario.ui.progress": "draft",
+        "life_tactics.scenario.ui.summary": "draft",
+        "life_tactics.scenario.ui.tie": "draft",
+        "life_tactics.scenario.ui.title": "draft"
+      },
+      "strings": {
+        "life_tactics.scenario.sc01": "주말에 동네를 걸을 시간이 한 시간 생겼어요. 어느 길로 갈까요?",
+        "life_tactics.scenario.sc01.sc01_h": "걷는 내내 기분이 좋아지는 단골 산책길을 걷는다.",
+        "life_tactics.scenario.sc01.sc01_m": "내게 소중한 기억이 담긴 장소들을 이어서 걷는다.",
+        "life_tactics.scenario.sc01.sc01_r": "늘 지나친 골목에 들어가 그 안의 풍경을 살펴본다.",
+        "life_tactics.scenario.sc02": "친구와 통화하다 보니 한 가지 이야기를 더 나눌 시간이 있어요. 어떤 말을 먼저 꺼낼까요?",
+        "life_tactics.scenario.sc02.sc02_h": "둘이 떠올릴 때마다 웃게 되는 일화를 꺼낸다.",
+        "life_tactics.scenario.sc02.sc02_m": "요즘 내게 중요한 일이 왜 중요한지 이야기한다.",
+        "life_tactics.scenario.sc02.sc02_r": "같은 일을 서로 어떻게 다르게 기억하는지 물어본다.",
+        "life_tactics.scenario.sc03": "한 달 동안 하루 한 장씩 사진을 남긴다면 어떤 주제로 찍고 싶나요?",
+        "life_tactics.scenario.sc03.sc03_h": "볼 때마다 내 기분이 좋아지는 순간들을 담는다.",
+        "life_tactics.scenario.sc03.sc03_m": "내가 시간을 들여 지켜 가고 싶은 것들을 담는다.",
+        "life_tactics.scenario.sc03.sc03_r": "익숙한 사물이 낯설어 보이는 각도를 찾아 담는다.",
+        "life_tactics.scenario.sc04": "동네 축제에서 작은 공연 하나를 볼 수 있어요. 어느 무대 앞에 앉을까요?",
+        "life_tactics.scenario.sc04.sc04_h": "좋아하는 노래를 따라 부르며 즐길 수 있는 무대.",
+        "life_tactics.scenario.sc04.sc04_m": "내가 오래 관심을 둔 주제를 노래로 풀어낸 무대.",
+        "life_tactics.scenario.sc04.sc04_r": "익숙한 노래를 전혀 다른 방식으로 들려주는 무대.",
+        "life_tactics.scenario.sc05": "작은 모임에서 다음 달에 함께 해 볼 일을 하나 정해요. 어느 제안에 손을 들까요?",
+        "life_tactics.scenario.sc05.sc05_h": "다 같이 좋아했던 놀이를 한 번 더 해 보자.",
+        "life_tactics.scenario.sc05.sc05_m": "우리가 처음 모인 이유를 살릴 활동을 해 보자.",
+        "life_tactics.scenario.sc05.sc05_r": "서로 하던 역할을 바꿔서 하루를 보내 보자.",
+        "life_tactics.scenario.sc06": "오늘 하루에서 한 장면을 골라 짧은 글로 남긴다면 어느 장면을 고를까요?",
+        "life_tactics.scenario.sc06.sc06_h": "쓰는 동안 그때의 즐거움을 다시 느낄 수 있는 장면.",
+        "life_tactics.scenario.sc06.sc06_m": "내가 무엇을 소중히 여기는지 잘 드러난 장면.",
+        "life_tactics.scenario.sc06.sc06_r": "처음의 내 생각이 예상 밖으로 달라졌던 장면.",
+        "life_tactics.scenario.ui.balanced": "세 가지를 두 번씩 골랐어요.",
+        "life_tactics.scenario.ui.count": "{axis} · {count}회",
+        "life_tactics.scenario.ui.finish": "내 결과 보기",
+        "life_tactics.scenario.ui.intro": "이번에는 세 가지 중 지금 가장 마음이 가는 하나를 골라 줘.",
+        "life_tactics.scenario.ui.lead": "이번 여섯 장면에서는 {axis}에 해당하는 선택을 가장 자주 했어요.",
+        "life_tactics.scenario.ui.open": "상황 선택 시작",
+        "life_tactics.scenario.ui.progress": "상황 선택 {current} / {total}",
+        "life_tactics.scenario.ui.summary": "여섯 장면에서 내가 고른 것",
+        "life_tactics.scenario.ui.tie": "이번 여섯 장면에서는 {axes}에 해당하는 선택을 같은 횟수로 가장 자주 했어요.",
+        "life_tactics.scenario.ui.title": "상황 속 나의 선택"
+      }
+    },
+    "pt-BR": {
+      "statuses": {
+        "life_tactics.scenario.sc01": "missing",
+        "life_tactics.scenario.sc01.sc01_h": "missing",
+        "life_tactics.scenario.sc01.sc01_m": "missing",
+        "life_tactics.scenario.sc01.sc01_r": "missing",
+        "life_tactics.scenario.sc02": "missing",
+        "life_tactics.scenario.sc02.sc02_h": "missing",
+        "life_tactics.scenario.sc02.sc02_m": "missing",
+        "life_tactics.scenario.sc02.sc02_r": "missing",
+        "life_tactics.scenario.sc03": "missing",
+        "life_tactics.scenario.sc03.sc03_h": "missing",
+        "life_tactics.scenario.sc03.sc03_m": "missing",
+        "life_tactics.scenario.sc03.sc03_r": "missing",
+        "life_tactics.scenario.sc04": "missing",
+        "life_tactics.scenario.sc04.sc04_h": "missing",
+        "life_tactics.scenario.sc04.sc04_m": "missing",
+        "life_tactics.scenario.sc04.sc04_r": "missing",
+        "life_tactics.scenario.sc05": "missing",
+        "life_tactics.scenario.sc05.sc05_h": "missing",
+        "life_tactics.scenario.sc05.sc05_m": "missing",
+        "life_tactics.scenario.sc05.sc05_r": "missing",
+        "life_tactics.scenario.sc06": "missing",
+        "life_tactics.scenario.sc06.sc06_h": "missing",
+        "life_tactics.scenario.sc06.sc06_m": "missing",
+        "life_tactics.scenario.sc06.sc06_r": "missing",
+        "life_tactics.scenario.ui.balanced": "missing",
+        "life_tactics.scenario.ui.count": "missing",
+        "life_tactics.scenario.ui.finish": "missing",
+        "life_tactics.scenario.ui.intro": "missing",
+        "life_tactics.scenario.ui.lead": "missing",
+        "life_tactics.scenario.ui.open": "missing",
+        "life_tactics.scenario.ui.progress": "missing",
+        "life_tactics.scenario.ui.summary": "missing",
+        "life_tactics.scenario.ui.tie": "missing",
+        "life_tactics.scenario.ui.title": "missing"
+      },
+      "strings": {}
+    }
+  },
+  "pilotVersion": "scenario_v1",
+  "quizId": "life_tactics",
+  "scenarios": [
+    {
+      "options": [
+        {
+          "dimensionId": "happiness",
+          "labelTextKey": "life_tactics.scenario.sc01.sc01_h",
+          "optionId": "sc01_h",
+          "sortOrder": 1
+        },
+        {
+          "dimensionId": "meaning",
+          "labelTextKey": "life_tactics.scenario.sc01.sc01_m",
+          "optionId": "sc01_m",
+          "sortOrder": 2
+        },
+        {
+          "dimensionId": "richness",
+          "labelTextKey": "life_tactics.scenario.sc01.sc01_r",
+          "optionId": "sc01_r",
+          "sortOrder": 3
+        }
+      ],
+      "promptTextKey": "life_tactics.scenario.sc01",
+      "scenarioId": "sc01",
+      "sortOrder": 1
+    },
+    {
+      "options": [
+        {
+          "dimensionId": "richness",
+          "labelTextKey": "life_tactics.scenario.sc02.sc02_r",
+          "optionId": "sc02_r",
+          "sortOrder": 1
+        },
+        {
+          "dimensionId": "happiness",
+          "labelTextKey": "life_tactics.scenario.sc02.sc02_h",
+          "optionId": "sc02_h",
+          "sortOrder": 2
+        },
+        {
+          "dimensionId": "meaning",
+          "labelTextKey": "life_tactics.scenario.sc02.sc02_m",
+          "optionId": "sc02_m",
+          "sortOrder": 3
+        }
+      ],
+      "promptTextKey": "life_tactics.scenario.sc02",
+      "scenarioId": "sc02",
+      "sortOrder": 2
+    },
+    {
+      "options": [
+        {
+          "dimensionId": "meaning",
+          "labelTextKey": "life_tactics.scenario.sc03.sc03_m",
+          "optionId": "sc03_m",
+          "sortOrder": 1
+        },
+        {
+          "dimensionId": "richness",
+          "labelTextKey": "life_tactics.scenario.sc03.sc03_r",
+          "optionId": "sc03_r",
+          "sortOrder": 2
+        },
+        {
+          "dimensionId": "happiness",
+          "labelTextKey": "life_tactics.scenario.sc03.sc03_h",
+          "optionId": "sc03_h",
+          "sortOrder": 3
+        }
+      ],
+      "promptTextKey": "life_tactics.scenario.sc03",
+      "scenarioId": "sc03",
+      "sortOrder": 3
+    },
+    {
+      "options": [
+        {
+          "dimensionId": "happiness",
+          "labelTextKey": "life_tactics.scenario.sc04.sc04_h",
+          "optionId": "sc04_h",
+          "sortOrder": 1
+        },
+        {
+          "dimensionId": "meaning",
+          "labelTextKey": "life_tactics.scenario.sc04.sc04_m",
+          "optionId": "sc04_m",
+          "sortOrder": 2
+        },
+        {
+          "dimensionId": "richness",
+          "labelTextKey": "life_tactics.scenario.sc04.sc04_r",
+          "optionId": "sc04_r",
+          "sortOrder": 3
+        }
+      ],
+      "promptTextKey": "life_tactics.scenario.sc04",
+      "scenarioId": "sc04",
+      "sortOrder": 4
+    },
+    {
+      "options": [
+        {
+          "dimensionId": "richness",
+          "labelTextKey": "life_tactics.scenario.sc05.sc05_r",
+          "optionId": "sc05_r",
+          "sortOrder": 1
+        },
+        {
+          "dimensionId": "happiness",
+          "labelTextKey": "life_tactics.scenario.sc05.sc05_h",
+          "optionId": "sc05_h",
+          "sortOrder": 2
+        },
+        {
+          "dimensionId": "meaning",
+          "labelTextKey": "life_tactics.scenario.sc05.sc05_m",
+          "optionId": "sc05_m",
+          "sortOrder": 3
+        }
+      ],
+      "promptTextKey": "life_tactics.scenario.sc05",
+      "scenarioId": "sc05",
+      "sortOrder": 5
+    },
+    {
+      "options": [
+        {
+          "dimensionId": "meaning",
+          "labelTextKey": "life_tactics.scenario.sc06.sc06_m",
+          "optionId": "sc06_m",
+          "sortOrder": 1
+        },
+        {
+          "dimensionId": "richness",
+          "labelTextKey": "life_tactics.scenario.sc06.sc06_r",
+          "optionId": "sc06_r",
+          "sortOrder": 2
+        },
+        {
+          "dimensionId": "happiness",
+          "labelTextKey": "life_tactics.scenario.sc06.sc06_h",
+          "optionId": "sc06_h",
+          "sortOrder": 3
+        }
+      ],
+      "promptTextKey": "life_tactics.scenario.sc06",
+      "scenarioId": "sc06",
+      "sortOrder": 6
+    }
+  ]
+}

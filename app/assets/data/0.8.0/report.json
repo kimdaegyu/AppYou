@@ -1,0 +1,56 @@
+{
+  "dataVersion": "0.8.0",
+  "excluded": [
+    {
+      "quizId": "life_tactics",
+      "reasons": [
+        "진단이 비활성",
+        "판정 규칙이 승인 전",
+        "활성 문항이 검수 완료가 아님",
+        "승인된 활성 결과 타입이 없음",
+        "출시 언어 번역이 검수 완료가 아님"
+      ]
+    },
+    {
+      "quizId": "wealth_four",
+      "reasons": [
+        "진단이 비활성",
+        "ScoreMode가 independent_sum이 아님",
+        "CompletionPolicy가 all_required가 아님",
+        "판정 규칙이 승인 전",
+        "출시용 화면 템플릿이 아님",
+        "승인된 활성 결과 타입이 없음",
+        "출시 언어 번역이 검수 완료가 아님"
+      ]
+    }
+  ],
+  "machineDraftValues": 288,
+  "releaseQuizIds": [],
+  "schemaVersion": 2,
+  "unreviewedKeys": {
+    "en": 118,
+    "ja": 118,
+    "ko": 118,
+    "pt-BR": 118
+  },
+  "warnings": [
+    "QuizData.xlsx / Quizzes / 2행 / QuizId: 출시 목록에서 제외합니다. 진단이 비활성; 판정 규칙이 승인 전; 활성 문항이 검수 완료가 아님; 승인된 활성 결과 타입이 없음; 출시 언어 번역이 검수 완료가 아님",
+    "QuizData.xlsx / Quizzes / 3행 / QuizId: 출시 목록에서 제외합니다. 진단이 비활성; ScoreMode가 independent_sum이 아님; CompletionPolicy가 all_required가 아님; 판정 규칙이 승인 전; 출시용 화면 템플릿이 아님; 승인된 활성 결과 타입이 없음; 출시 언어 번역이 검수 완료가 아님",
+    "QuizData.xlsx / Quizzes / 4행 / QuizId: 출시 목록에서 제외합니다. 진단이 비활성; 판정 규칙이 승인 전; 활성 문항이 검수 완료가 아님; 승인된 활성 결과 타입이 없음; 출시 언어 번역이 검수 완료가 아님",
+    "QuizData.xlsx / Quizzes / 5행 / QuizId: 출시 목록에서 제외합니다. 진단이 비활성; ScoreMode가 independent_sum이 아님; CompletionPolicy가 all_required가 아님; 판정 규칙이 승인 전; 출시용 화면 템플릿이 아님; 승인된 활성 결과 타입이 없음; 출시 언어 번역이 검수 완료가 아님",
+    "QuizData.xlsx / Quizzes / 6행 / QuizId: 출시 목록에서 제외합니다. 진단이 비활성; 판정 규칙이 승인 전; 활성 문항이 검수 완료가 아님; 승인된 활성 결과 타입이 없음; 출시 언어 번역이 검수 완료가 아님",
+    "QuizData.xlsx / Quizzes / 7행 / QuizId: 출시 목록에서 제외합니다. 진단이 비활성; ScoreMode가 independent_sum이 아님; CompletionPolicy가 all_required가 아님; 판정 규칙이 승인 전; 출시용 화면 템플릿이 아님; 승인된 활성 결과 타입이 없음; 출시 언어 번역이 검수 완료가 아님",
+    "QuizData.xlsx / Quizzes / 8행 / QuizId: 출시 목록에서 제외합니다. 진단이 비활성; 판정 규칙이 승인 전; 활성 문항이 검수 완료가 아님; 승인된 활성 결과 타입이 없음; 출시 언어 번역이 검수 완료가 아님",
+    "QuizData.xlsx / Quizzes / 9행 / QuizId: 출시 목록에서 제외합니다. 진단이 비활성; ScoreMode가 independent_sum이 아님; CompletionPolicy가 all_required가 아님; 판정 규칙이 승인 전; 출시용 화면 템플릿이 아님; 승인된 활성 결과 타입이 없음; 출시 언어 번역이 검수 완료가 아님",
+    "QuizData.xlsx / Quizzes / 10행 / QuizId: 출시 목록에서 제외합니다. 진단이 비활성; 판정 규칙이 승인 전; 활성 문항이 검수 완료가 아님; 승인된 활성 결과 타입이 없음; 출시 언어 번역이 검수 완료가 아님",
+    "QuizData.xlsx / Quizzes / 11행 / QuizId: 출시 목록에서 제외합니다. 진단이 비활성; ScoreMode가 independent_sum이 아님; CompletionPolicy가 all_required가 아님; 판정 규칙이 승인 전; 출시용 화면 템플릿이 아님; 승인된 활성 결과 타입이 없음; 출시 언어 번역이 검수 완료가 아님",
+    "QuizData.xlsx / Quizzes / 12행 / QuizId: 출시 목록에서 제외합니다. 진단이 비활성; 판정 규칙이 승인 전; 활성 문항이 검수 완료가 아님; 승인된 활성 결과 타입이 없음; 출시 언어 번역이 검수 완료가 아님",
+    "QuizData.xlsx / Quizzes / 13행 / QuizId: 출시 목록에서 제외합니다. 진단이 비활성; ScoreMode가 independent_sum이 아님; CompletionPolicy가 all_required가 아님; 판정 규칙이 승인 전; 출시용 화면 템플릿이 아님; 승인된 활성 결과 타입이 없음; 출시 언어 번역이 검수 완료가 아님",
+    "QuizData.xlsx / Quizzes / 14행 / QuizId: 출시 목록에서 제외합니다. 진단이 비활성; 판정 규칙이 승인 전; 활성 문항이 검수 완료가 아님; 승인된 활성 결과 타입이 없음; 출시 언어 번역이 검수 완료가 아님",
+    "QuizData.xlsx / Quizzes / 15행 / QuizId: 출시 목록에서 제외합니다. 진단이 비활성; ScoreMode가 independent_sum이 아님; CompletionPolicy가 all_required가 아님; 판정 규칙이 승인 전; 출시용 화면 템플릿이 아님; 승인된 활성 결과 타입이 없음; 출시 언어 번역이 검수 완료가 아님",
+    "QuizData.xlsx / Quizzes / 16행 / QuizId: 출시 목록에서 제외합니다. 진단이 비활성; 판정 규칙이 승인 전; 활성 문항이 검수 완료가 아님; 승인된 활성 결과 타입이 없음; 출시 언어 번역이 검수 완료가 아님",
+    "QuizData.xlsx / Quizzes / 17행 / QuizId: 출시 목록에서 제외합니다. 진단이 비활성; ScoreMode가 independent_sum이 아님; CompletionPolicy가 all_required가 아님; 판정 규칙이 승인 전; 출시용 화면 템플릿이 아님; 승인된 활성 결과 타입이 없음; 출시 언어 번역이 검수 완료가 아님",
+    "QuizData.xlsx / Quizzes / 18행 / QuizId: 출시 목록에서 제외합니다. 진단이 비활성; 판정 규칙이 승인 전; 활성 문항이 검수 완료가 아님; 승인된 활성 결과 타입이 없음; 출시 언어 번역이 검수 완료가 아님",
+    "QuizData.xlsx / Quizzes / 19행 / QuizId: 출시 목록에서 제외합니다. 진단이 비활성; ScoreMode가 independent_sum이 아님; CompletionPolicy가 all_required가 아님; 판정 규칙이 승인 전; 출시용 화면 템플릿이 아님; 승인된 활성 결과 타입이 없음; 출시 언어 번역이 검수 완료가 아님"
+  ]
+}

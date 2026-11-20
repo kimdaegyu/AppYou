@@ -1,0 +1,31 @@
+{
+  "channel": "preview",
+  "dataVersion": "0.7.1",
+  "quizzes": [
+    {
+      "completionPolicy": "all_required",
+      "introTextKey": "life_tactics.intro",
+      "isActive": false,
+      "questionCount": 18,
+      "quizId": "life_tactics",
+      "resultRuleStatus": "pending",
+      "resultTemplateId": "football_formation",
+      "scoreMode": "independent_sum",
+      "sortOrder": 1,
+      "titleTextKey": "life_tactics.title"
+    },
+    {
+      "completionPolicy": "pending",
+      "introTextKey": "wealth_four.intro",
+      "isActive": false,
+      "questionCount": 0,
+      "quizId": "wealth_four",
+      "resultRuleStatus": "pending",
+      "resultTemplateId": "wealth_profile",
+      "scoreMode": "pending",
+      "sortOrder": 2,
+      "titleTextKey": "wealth_four.title"
+    }
+  ],
+  "schemaVersion": 2
+}

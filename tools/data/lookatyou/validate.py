@@ -66,6 +66,31 @@ def validate_tables(tables):
         "RuleMappings",
         errors,
     )
+    scenarios = _models(
+        tables.get(("QuestionData.xlsx", "Scenarios"), []),
+        "QuestionData.xlsx",
+        "Scenarios",
+        errors,
+    )
+    scenario_options = _models(
+        tables.get(("QuestionData.xlsx", "ScenarioOptions"), []),
+        "QuestionData.xlsx",
+        "ScenarioOptions",
+        errors,
+    )
+    pilot_strings = _models(
+        tables.get(("Localization.xlsx", "PilotStrings"), []),
+        "Localization.xlsx",
+        "PilotStrings",
+        errors,
+    )
+    scenario_scores = _models(
+        tables.get(("QuestionData.xlsx", "ScenarioOptionScores"), []),
+        "QuestionData.xlsx",
+        "ScenarioOptionScores",
+        errors,
+    )
+    has_scenario_scores = ("QuestionData.xlsx", "ScenarioOptionScores") in tables
 
     versions = {}
     groups = (
@@ -77,16 +102,21 @@ def validate_tables(tables):
         ("strings", strings),
         ("ruleSets", rule_sets),
         ("ruleMappings", rule_mappings),
+        ("scenarios", scenarios),
+        ("scenarioOptions", scenario_options),
+        ("pilotStrings", pilot_strings),
+        ("scenarioOptionScores", scenario_scores),
     )
     for name, records in groups:
         for record in records:
-            version = record.get("dataVersion")
+            version = record.get("dataVersion") or record.get("baseDataVersion")
             if not version:
                 continue
             versions.setdefault(version, {key: [] for key, _ in groups})
             versions[version][name].append(record)
 
     for version, bundle in versions.items():
+        bundle["hasScenarioScores"] = has_scenario_scores
         _validate_version(version, bundle, errors, warnings)
     return errors, warnings, versions
 
@@ -111,6 +141,14 @@ def _models(records, filename, sheet, errors):
             model.update(_rule_set(record, location, errors))
         elif sheet == "RuleMappings":
             model.update(_rule_mapping(record, location, errors))
+        elif sheet == "Scenarios":
+            model.update(_scenario(record, location, errors))
+        elif sheet == "ScenarioOptions":
+            model.update(_scenario_option(record, location, errors))
+        elif sheet == "PilotStrings":
+            model.update(_pilot_string(record, location, errors))
+        elif sheet == "ScenarioOptionScores":
+            model.update(_scenario_score(record, location, errors))
         else:
             model.update(_string(record, location, errors))
         models.append(model)
@@ -186,6 +224,7 @@ def _validate_version(version, bundle, errors, warnings):
                 )
             )
     _validate_rules(version, bundle, errors)
+    _validate_pilots(bundle, errors)
     bundle["schemaVersion"] = 2 if bundle.get("ruleSets") else 1
 
 
@@ -907,6 +946,424 @@ def _optional_identifier(record, column, location, errors):
     if any(character.isspace() for character in text):
         errors.append(DataError("ID에 공백이 있습니다.", **location, column=column))
     return text
+
+
+def _validate_pilots(bundle, errors):
+    """상황 선택 파일럿. 시트가 없으면 진단을 그대로 둔다."""
+    bundle["pilotDocuments"] = []
+    scenarios = bundle.get("scenarios", [])
+    options = bundle.get("scenarioOptions", [])
+    texts = bundle.get("pilotStrings", [])
+    if not scenarios and not options and not texts:
+        return
+
+    scopes = {}
+    for collection, label in (
+        (scenarios, "장면"),
+        (options, "선택지"),
+        (texts, "문구"),
+    ):
+        for item in collection:
+            key = (item.get("quizId"), item.get("baseDataVersion"), item.get("pilotVersion"))
+            scopes.setdefault(key, {"scenarios": [], "options": [], "texts": []})
+            scopes[key][{"장면": "scenarios", "선택지": "options", "문구": "texts"}[label]].append(item)
+
+    quizzes = {item.get("quizId") for item in bundle["quizzes"] if item.get("quizId")}
+    active_dimensions = {}
+    for item in bundle["dimensions"]:
+        if item.get("isActive") and item.get("dimensionId"):
+            active_dimensions.setdefault(item.get("quizId"), []).append(item["dimensionId"])
+
+    for (quiz_id, base_version, pilot_version), scope in scopes.items():
+        location_item = (scope["scenarios"] or scope["options"] or scope["texts"])[0]
+        if quiz_id not in quizzes:
+            errors.append(
+                DataError(
+                    f"상황 파일럿의 QuizId {quiz_id}가 {base_version}에 없습니다.",
+                    file=location_item["file"],
+                    sheet=location_item["sheet"],
+                    row=location_item["row"],
+                    column="QuizId",
+                )
+            )
+            continue
+        if not scope["scenarios"] or not scope["options"] or not scope["texts"]:
+            errors.append(
+                DataError(
+                    f"상황 파일럿 {pilot_version}의 장면·선택지·문구가 한 범위에 모이지 않았습니다.",
+                    file=location_item["file"],
+                    sheet=location_item["sheet"],
+                    row=location_item["row"],
+                    column="PilotVersion",
+                )
+            )
+            continue
+        _unique_within(scope["scenarios"], ("scenarioId",), "ScenarioId", errors)
+        _unique_order_within(scope["scenarios"], "pilotVersion", "Scenarios", errors)
+        _unique_within(scope["options"], ("optionId",), "OptionId", errors)
+        _unique_within(scope["texts"], ("key",), "Key", errors)
+        text_by_key = {}
+        for item in scope["texts"]:
+            key = item.get("key")
+            if key:
+                text_by_key[key] = item
+                if not item.get("values", {}).get("ko"):
+                    errors.append(
+                        DataError(
+                            "한국어가 비어 있습니다.",
+                            file=item["file"],
+                            sheet=item["sheet"],
+                            row=item["row"],
+                            column="ko",
+                        )
+                    )
+        dimensions = active_dimensions.get(quiz_id, [])
+        active = [item for item in scope["scenarios"] if item.get("isActive")]
+        if len(active) != 6:
+            errors.append(
+                DataError(
+                    f"활성 장면이 {len(active)}개입니다. 6개여야 합니다.",
+                    file=active[0]["file"] if active else scope["scenarios"][0]["file"],
+                    sheet="Scenarios",
+                    row=(active or scope["scenarios"])[0]["row"],
+                    column="ScenarioId",
+                )
+            )
+        options_by_scenario = {}
+        for item in scope["options"]:
+            options_by_scenario.setdefault(item.get("scenarioId"), []).append(item)
+            if item.get("scenarioId") not in {scenario.get("scenarioId") for scenario in scope["scenarios"]}:
+                errors.append(
+                    DataError(
+                        f"선택지의 ScenarioId {item.get('scenarioId')}가 없습니다.",
+                        file=item["file"],
+                        sheet=item["sheet"],
+                        row=item["row"],
+                        column="ScenarioId",
+                    )
+                )
+            if item.get("dimensionId") not in dimensions:
+                errors.append(
+                    DataError(
+                        f"축 {item.get('dimensionId')}가 활성 축에 없습니다.",
+                        file=item["file"],
+                        sheet=item["sheet"],
+                        row=item["row"],
+                        column="DimensionId",
+                    )
+                )
+        score_rows = [
+            item for item in bundle.get("scenarioOptionScores", [])
+            if (item.get("quizId"), item.get("baseDataVersion"), item.get("pilotVersion"))
+            == (quiz_id, base_version, pilot_version)
+        ]
+        scored = pilot_version == "scenario_v2"
+        if scored and not bundle.get("hasScenarioScores"):
+            errors.append(
+                DataError(
+                    "시트가 없습니다.",
+                    file="QuestionData.xlsx",
+                    sheet="ScenarioOptionScores",
+                    row=location_item["row"],
+                    column="PilotVersion",
+                )
+            )
+        elif score_rows and not scored:
+            errors.append(
+                DataError(
+                    f"{pilot_version}에는 상황 배점을 두지 않습니다.",
+                    file=score_rows[0]["file"],
+                    sheet=score_rows[0]["sheet"],
+                    row=score_rows[0]["row"],
+                    column="PilotVersion",
+                )
+            )
+        elif scored:
+            _unique_within(
+                score_rows,
+                ("scenarioId", "optionId", "dimensionId"),
+                "DimensionId",
+                errors,
+            )
+            _validate_option_points(
+                score_rows,
+                scope["options"],
+                dimensions,
+                errors,
+            )
+        for scenario in scope["scenarios"]:
+            prompt = scenario.get("promptTextKey")
+            if prompt not in text_by_key:
+                errors.append(
+                    DataError(
+                        f"문구 키 {prompt}가 PilotStrings에 없습니다.",
+                        file=scenario["file"],
+                        sheet=scenario["sheet"],
+                        row=scenario["row"],
+                        column="PromptTextKey",
+                    )
+                )
+            rows = options_by_scenario.get(scenario.get("scenarioId"), [])
+            _unique_order_within(rows, "scenarioId", "ScenarioOptions", errors)
+            found = [item.get("dimensionId") for item in rows]
+            if found.count(None) == 0 and sorted(found) != sorted(dimensions):
+                errors.append(
+                    DataError(
+                        "장면의 선택지가 활성 축과 하나씩 연결되지 않습니다.",
+                        file=scenario["file"],
+                        sheet=scenario["sheet"],
+                        row=scenario["row"],
+                        column="ScenarioId",
+                    )
+                )
+            for item in rows:
+                label = item.get("labelTextKey")
+                if label not in text_by_key:
+                    errors.append(
+                        DataError(
+                            f"문구 키 {label}가 PilotStrings에 없습니다.",
+                            file=item["file"],
+                            sheet=item["sheet"],
+                            row=item["row"],
+                            column="LabelTextKey",
+                        )
+                    )
+        document = _pilot_document(
+            quiz_id,
+            base_version,
+            pilot_version,
+            active,
+            options_by_scenario,
+            text_by_key,
+            score_rows if scored else None,
+        )
+        bundle["pilotDocuments"].append(document)
+    known_scopes = set(scopes)
+    for item in bundle.get("scenarioOptionScores", []):
+        key = (item.get("quizId"), item.get("baseDataVersion"), item.get("pilotVersion"))
+        if key not in known_scopes:
+            errors.append(
+                DataError(
+                    "상황 배점의 버전이 장면과 섞여 있습니다.",
+                    file=item["file"],
+                    sheet=item["sheet"],
+                    row=item["row"],
+                    column="PilotVersion",
+                )
+            )
+
+
+def _validate_option_points(score_rows, options, dimensions, errors):
+    """0점은 있는 값이다. 행이 없으면 누락이다."""
+    by_option = {}
+    option_locations = {}
+    known_options = {}
+    for item in options:
+        known_options.setdefault(item.get("scenarioId"), {})[item.get("optionId")] = item
+    for item in score_rows:
+        scenario_id = item.get("scenarioId")
+        option_id = item.get("optionId")
+        owner = known_options.get(scenario_id, {}).get(option_id)
+        if owner is None:
+            errors.append(
+                DataError(
+                    f"배점의 선택지 {option_id}가 없습니다.",
+                    file=item["file"],
+                    sheet=item["sheet"],
+                    row=item["row"],
+                    column="OptionId",
+                )
+            )
+            continue
+        if item.get("dimensionId") not in dimensions:
+            errors.append(
+                DataError(
+                    f"축 {item.get('dimensionId')}가 활성 축에 없습니다.",
+                    file=item["file"],
+                    sheet=item["sheet"],
+                    row=item["row"],
+                    column="DimensionId",
+                )
+            )
+            continue
+        by_option.setdefault((scenario_id, option_id), {})[item.get("dimensionId")] = item.get("points")
+        option_locations[(scenario_id, option_id)] = item
+    for item in options:
+        key = (item.get("scenarioId"), item.get("optionId"))
+        points = by_option.get(key, {})
+        location = option_locations.get(key, item)
+        if sorted(points) != sorted(dimensions):
+            errors.append(
+                DataError(
+                    "선택지의 축 배점이 빠졌습니다.",
+                    file=location["file"],
+                    sheet=location["sheet"],
+                    row=location["row"],
+                    column="DimensionId",
+                )
+            )
+            continue
+        values = [points[dimension_id] for dimension_id in dimensions]
+        if any(value is None for value in values):
+            continue
+        if sorted(values) != [0, 1, 2] or points.get(item.get("dimensionId")) != 2:
+            errors.append(
+                DataError(
+                    "배점 합계 또는 주축이 2·1·0과 맞지 않습니다.",
+                    file=location["file"],
+                    sheet=location["sheet"],
+                    row=location["row"],
+                    column="Points",
+                )
+            )
+
+
+def _pilot_document(quiz_id, base_version, pilot_version, active, options_by_scenario, text_by_key, score_rows=None):
+    points_by_option = {}
+    for item in score_rows or []:
+        points_by_option.setdefault((item.get("scenarioId"), item.get("optionId")), {})[item.get("dimensionId")] = item.get("points")
+    scenarios = []
+    for scenario in sorted(active, key=lambda item: (item.get("sortOrder") or 0, item.get("scenarioId") or "")):
+        rows = sorted(
+            options_by_scenario.get(scenario.get("scenarioId"), []),
+            key=lambda item: (item.get("sortOrder") or 0, item.get("optionId") or ""),
+        )
+        options = []
+        for item in rows:
+            option = {
+                "optionId": item.get("optionId"),
+                "sortOrder": item.get("sortOrder"),
+                "dimensionId": item.get("dimensionId"),
+                "labelTextKey": item.get("labelTextKey"),
+            }
+            if score_rows is not None:
+                option["pointsByDimension"] = points_by_option.get((scenario.get("scenarioId"), item.get("optionId")), {})
+            options.append(option)
+        scenarios.append({
+            "scenarioId": scenario.get("scenarioId"),
+            "sortOrder": scenario.get("sortOrder"),
+            "promptTextKey": scenario.get("promptTextKey"),
+            "options": options,
+        })
+    locales = {}
+    for language in RELEASE_LANGUAGES:
+        strings = {}
+        statuses = {}
+        for key in sorted(text_by_key):
+            item = text_by_key[key]
+            status = item.get("statuses", {}).get(language)
+            text = item.get("values", {}).get(language)
+            if status:
+                statuses[key] = status
+            if text:
+                strings[key] = text
+        locales[language] = {"statuses": statuses, "strings": strings}
+    document = {
+        "baseDataVersion": base_version,
+        "locales": locales,
+        "pilotVersion": pilot_version,
+        "quizId": quiz_id,
+        "scenarios": scenarios,
+    }
+    if score_rows is not None:
+        document["scoringMode"] = "option_points"
+    return document
+
+
+def _scenario(record, location, errors):
+    return {
+        **_pilot_scope(record, location, errors),
+        "scenarioId": _identifier(record, "ScenarioId", location, errors),
+        "sortOrder": _order(record, location, errors),
+        "promptTextKey": _required_text(record, "PromptTextKey", location, errors),
+        "isActive": _bool(record, "IsActive", location, errors),
+    }
+
+
+def _scenario_option(record, location, errors):
+    return {
+        **_pilot_scope(record, location, errors),
+        "scenarioId": _identifier(record, "ScenarioId", location, errors),
+        "optionId": _identifier(record, "OptionId", location, errors),
+        "sortOrder": _order(record, location, errors),
+        "dimensionId": _identifier(record, "DimensionId", location, errors),
+        "labelTextKey": _required_text(record, "LabelTextKey", location, errors),
+    }
+
+
+def _scenario_score(record, location, errors):
+    return {
+        **_pilot_scope(record, location, errors),
+        "scenarioId": _identifier(record, "ScenarioId", location, errors),
+        "optionId": _identifier(record, "OptionId", location, errors),
+        "dimensionId": _identifier(record, "DimensionId", location, errors),
+        "points": _non_negative_int(record, "Points", location, errors),
+    }
+
+
+def _non_negative_int(record, column, location, errors):
+    value = record.get(column)
+    if value is None or value == "":
+        errors.append(DataError("값이 비어 있습니다.", **location, column=column))
+        return None
+    if isinstance(value, bool) or not isinstance(value, int):
+        errors.append(DataError("0 이상의 정수여야 합니다.", **location, column=column))
+        return None
+    if value < 0:
+        errors.append(DataError("0 이상의 정수여야 합니다.", **location, column=column))
+        return None
+    return value
+
+
+def _pilot_scope(record, location, errors):
+    return {
+        "quizId": _identifier(record, "QuizId", location, errors),
+        "baseDataVersion": _version_column(record, "BaseDataVersion", location, errors),
+        "pilotVersion": _identifier(record, "PilotVersion", location, errors),
+    }
+
+
+def _pilot_string(record, location, errors):
+    values = {}
+    statuses = {}
+    for language in RELEASE_LANGUAGES:
+        values[language] = _optional_text(record.get(language), language, location, errors)
+        statuses[language] = _choice(record, STATUS_COLUMNS[language], STRING_STATUSES, location, errors)
+        _status_matches(values[language], statuses[language], language, location, errors)
+    ko_placeholders = _placeholders(values.get("ko"))
+    for language in RELEASE_LANGUAGES:
+        if language == "ko" or not values.get(language):
+            continue
+        other = _placeholders(values[language])
+        if other != ko_placeholders:
+            errors.append(
+                DataError(
+                    f"치환 변수 {_format_placeholders(other)}가 한국어 {_format_placeholders(ko_placeholders)}와 다릅니다.",
+                    **location,
+                    column=language,
+                )
+            )
+    return {
+        **_pilot_scope(record, location, errors),
+        "key": _required_text(record, "Key", location, errors),
+        "values": values,
+        "statuses": statuses,
+    }
+
+
+def _version_column(record, column, location, errors):
+    value = _required_text(record, column, location, errors)
+    if value is None:
+        return None
+    if not VERSION_PATTERN.fullmatch(value):
+        errors.append(
+            DataError(
+                f"{column}은 major.minor.patch 형식이어야 합니다.",
+                **location,
+                column=column,
+            )
+        )
+    return value
 
 
 def _string(record, location, errors):

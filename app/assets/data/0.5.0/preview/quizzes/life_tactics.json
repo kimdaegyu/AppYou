@@ -1,0 +1,546 @@
+{
+  "completionPolicy": "all_required",
+  "dataVersion": "0.5.0",
+  "dimensions": [
+    {
+      "dataVersion": "0.5.0",
+      "dimensionId": "happiness",
+      "isActive": true,
+      "nameTextKey": "life_tactics.axis.happiness",
+      "quizId": "life_tactics",
+      "roleTextKey": "life_tactics.role.happiness",
+      "sortOrder": 1
+    },
+    {
+      "dataVersion": "0.5.0",
+      "dimensionId": "meaning",
+      "isActive": true,
+      "nameTextKey": "life_tactics.axis.meaning",
+      "quizId": "life_tactics",
+      "roleTextKey": "life_tactics.role.meaning",
+      "sortOrder": 2
+    },
+    {
+      "dataVersion": "0.5.0",
+      "dimensionId": "richness",
+      "isActive": true,
+      "nameTextKey": "life_tactics.axis.richness",
+      "quizId": "life_tactics",
+      "roleTextKey": "life_tactics.role.richness",
+      "sortOrder": 3
+    }
+  ],
+  "introTextKey": "life_tactics.intro",
+  "isActive": false,
+  "options": [
+    {
+      "dataVersion": "0.5.0",
+      "isActive": true,
+      "labelTextKey": "life_tactics.answer.a1",
+      "optionId": "a1",
+      "quizId": "life_tactics",
+      "scaleId": "agreement5",
+      "scoreValue": 1,
+      "sortOrder": 1
+    },
+    {
+      "dataVersion": "0.5.0",
+      "isActive": true,
+      "labelTextKey": "life_tactics.answer.a2",
+      "optionId": "a2",
+      "quizId": "life_tactics",
+      "scaleId": "agreement5",
+      "scoreValue": 2,
+      "sortOrder": 2
+    },
+    {
+      "dataVersion": "0.5.0",
+      "isActive": true,
+      "labelTextKey": "life_tactics.answer.a3",
+      "optionId": "a3",
+      "quizId": "life_tactics",
+      "scaleId": "agreement5",
+      "scoreValue": 3,
+      "sortOrder": 3
+    },
+    {
+      "dataVersion": "0.5.0",
+      "isActive": true,
+      "labelTextKey": "life_tactics.answer.a4",
+      "optionId": "a4",
+      "quizId": "life_tactics",
+      "scaleId": "agreement5",
+      "scoreValue": 4,
+      "sortOrder": 4
+    },
+    {
+      "dataVersion": "0.5.0",
+      "isActive": true,
+      "labelTextKey": "life_tactics.answer.a5",
+      "optionId": "a5",
+      "quizId": "life_tactics",
+      "scaleId": "agreement5",
+      "scoreValue": 5,
+      "sortOrder": 5
+    }
+  ],
+  "questionCount": 18,
+  "questions": [
+    {
+      "dataVersion": "0.5.0",
+      "dimensionId": "happiness",
+      "isActive": true,
+      "promptTextKey": "life_tactics.question.lt_ed01",
+      "questionId": "lt_ed01",
+      "quizId": "life_tactics",
+      "reverse": false,
+      "reviewStatus": "draft",
+      "scaleId": "agreement5",
+      "sortOrder": 1,
+      "weight": 1
+    },
+    {
+      "dataVersion": "0.5.0",
+      "dimensionId": "meaning",
+      "isActive": true,
+      "promptTextKey": "life_tactics.question.lt_ed05",
+      "questionId": "lt_ed05",
+      "quizId": "life_tactics",
+      "reverse": false,
+      "reviewStatus": "draft",
+      "scaleId": "agreement5",
+      "sortOrder": 2,
+      "weight": 1
+    },
+    {
+      "dataVersion": "0.5.0",
+      "dimensionId": "richness",
+      "isActive": true,
+      "promptTextKey": "life_tactics.question.lt_ed09",
+      "questionId": "lt_ed09",
+      "quizId": "life_tactics",
+      "reverse": false,
+      "reviewStatus": "draft",
+      "scaleId": "agreement5",
+      "sortOrder": 3,
+      "weight": 1
+    },
+    {
+      "dataVersion": "0.5.0",
+      "dimensionId": "richness",
+      "isActive": true,
+      "promptTextKey": "life_tactics.question.lt_ed12",
+      "questionId": "lt_ed12",
+      "quizId": "life_tactics",
+      "reverse": false,
+      "reviewStatus": "draft",
+      "scaleId": "agreement5",
+      "sortOrder": 4,
+      "weight": 1
+    },
+    {
+      "dataVersion": "0.5.0",
+      "dimensionId": "happiness",
+      "isActive": true,
+      "promptTextKey": "life_tactics.question.lt_ed07",
+      "questionId": "lt_ed07",
+      "quizId": "life_tactics",
+      "reverse": false,
+      "reviewStatus": "draft",
+      "scaleId": "agreement5",
+      "sortOrder": 5,
+      "weight": 1
+    },
+    {
+      "dataVersion": "0.5.0",
+      "dimensionId": "meaning",
+      "isActive": true,
+      "promptTextKey": "life_tactics.question.lt_ed02",
+      "questionId": "lt_ed02",
+      "quizId": "life_tactics",
+      "reverse": false,
+      "reviewStatus": "draft",
+      "scaleId": "agreement5",
+      "sortOrder": 6,
+      "weight": 1
+    },
+    {
+      "dataVersion": "0.5.0",
+      "dimensionId": "meaning",
+      "isActive": true,
+      "promptTextKey": "life_tactics.question.lt_ed11",
+      "questionId": "lt_ed11",
+      "quizId": "life_tactics",
+      "reverse": false,
+      "reviewStatus": "draft",
+      "scaleId": "agreement5",
+      "sortOrder": 7,
+      "weight": 1
+    },
+    {
+      "dataVersion": "0.5.0",
+      "dimensionId": "happiness",
+      "isActive": true,
+      "promptTextKey": "life_tactics.question.lt_ed04",
+      "questionId": "lt_ed04",
+      "quizId": "life_tactics",
+      "reverse": false,
+      "reviewStatus": "draft",
+      "scaleId": "agreement5",
+      "sortOrder": 8,
+      "weight": 1
+    },
+    {
+      "dataVersion": "0.5.0",
+      "dimensionId": "richness",
+      "isActive": true,
+      "promptTextKey": "life_tactics.question.lt_rev_r01",
+      "questionId": "lt_rev_r01",
+      "quizId": "life_tactics",
+      "reverse": true,
+      "reviewStatus": "draft",
+      "scaleId": "agreement5",
+      "sortOrder": 9,
+      "weight": 1
+    },
+    {
+      "dataVersion": "0.5.0",
+      "dimensionId": "meaning",
+      "isActive": true,
+      "promptTextKey": "life_tactics.question.lt_rev_m01",
+      "questionId": "lt_rev_m01",
+      "quizId": "life_tactics",
+      "reverse": true,
+      "reviewStatus": "draft",
+      "scaleId": "agreement5",
+      "sortOrder": 10,
+      "weight": 1
+    },
+    {
+      "dataVersion": "0.5.0",
+      "dimensionId": "richness",
+      "isActive": true,
+      "promptTextKey": "life_tactics.question.lt_ed03",
+      "questionId": "lt_ed03",
+      "quizId": "life_tactics",
+      "reverse": false,
+      "reviewStatus": "draft",
+      "scaleId": "agreement5",
+      "sortOrder": 11,
+      "weight": 1
+    },
+    {
+      "dataVersion": "0.5.0",
+      "dimensionId": "happiness",
+      "isActive": true,
+      "promptTextKey": "life_tactics.question.lt_vp10",
+      "questionId": "lt_vp10",
+      "quizId": "life_tactics",
+      "reverse": false,
+      "reviewStatus": "draft",
+      "scaleId": "agreement5",
+      "sortOrder": 12,
+      "weight": 1
+    },
+    {
+      "dataVersion": "0.5.0",
+      "dimensionId": "meaning",
+      "isActive": true,
+      "promptTextKey": "life_tactics.question.lt_ed08",
+      "questionId": "lt_ed08",
+      "quizId": "life_tactics",
+      "reverse": false,
+      "reviewStatus": "draft",
+      "scaleId": "agreement5",
+      "sortOrder": 13,
+      "weight": 1
+    },
+    {
+      "dataVersion": "0.5.0",
+      "dimensionId": "richness",
+      "isActive": true,
+      "promptTextKey": "life_tactics.question.lt_ed15",
+      "questionId": "lt_ed15",
+      "quizId": "life_tactics",
+      "reverse": false,
+      "reviewStatus": "draft",
+      "scaleId": "agreement5",
+      "sortOrder": 14,
+      "weight": 1
+    },
+    {
+      "dataVersion": "0.5.0",
+      "dimensionId": "happiness",
+      "isActive": true,
+      "promptTextKey": "life_tactics.question.lt_rev_h01",
+      "questionId": "lt_rev_h01",
+      "quizId": "life_tactics",
+      "reverse": true,
+      "reviewStatus": "draft",
+      "scaleId": "agreement5",
+      "sortOrder": 15,
+      "weight": 1
+    },
+    {
+      "dataVersion": "0.5.0",
+      "dimensionId": "richness",
+      "isActive": true,
+      "promptTextKey": "life_tactics.question.lt_vp06",
+      "questionId": "lt_vp06",
+      "quizId": "life_tactics",
+      "reverse": false,
+      "reviewStatus": "draft",
+      "scaleId": "agreement5",
+      "sortOrder": 16,
+      "weight": 1
+    },
+    {
+      "dataVersion": "0.5.0",
+      "dimensionId": "happiness",
+      "isActive": true,
+      "promptTextKey": "life_tactics.question.lt_ed13",
+      "questionId": "lt_ed13",
+      "quizId": "life_tactics",
+      "reverse": false,
+      "reviewStatus": "draft",
+      "scaleId": "agreement5",
+      "sortOrder": 17,
+      "weight": 1
+    },
+    {
+      "dataVersion": "0.5.0",
+      "dimensionId": "meaning",
+      "isActive": true,
+      "promptTextKey": "life_tactics.question.lt_ed17",
+      "questionId": "lt_ed17",
+      "quizId": "life_tactics",
+      "reverse": false,
+      "reviewStatus": "draft",
+      "scaleId": "agreement5",
+      "sortOrder": 18,
+      "weight": 1
+    }
+  ],
+  "quizId": "life_tactics",
+  "resultRuleStatus": "pending",
+  "resultTemplateId": "football_formation",
+  "resultTypes": [
+    {
+      "catchphraseKey": "life_tactics.result.tr01.catchphrase",
+      "dataVersion": "0.5.0",
+      "descriptionKey": "life_tactics.result.tr01.description",
+      "designStatus": "candidate",
+      "formation": "4-2-4",
+      "isActive": false,
+      "nameTextKey": "life_tactics.result.tr01.name",
+      "quizId": "life_tactics",
+      "resultTemplateId": "football_formation",
+      "resultTypeId": "tr01",
+      "shareTextKey": "life_tactics.result.tr01.share",
+      "sortOrder": 1
+    },
+    {
+      "catchphraseKey": "life_tactics.result.tr02.catchphrase",
+      "dataVersion": "0.5.0",
+      "descriptionKey": "life_tactics.result.tr02.description",
+      "designStatus": "candidate",
+      "formation": "3-4-3",
+      "isActive": false,
+      "nameTextKey": "life_tactics.result.tr02.name",
+      "quizId": "life_tactics",
+      "resultTemplateId": "football_formation",
+      "resultTypeId": "tr02",
+      "shareTextKey": "life_tactics.result.tr02.share",
+      "sortOrder": 2
+    },
+    {
+      "catchphraseKey": "life_tactics.result.tr03.catchphrase",
+      "dataVersion": "0.5.0",
+      "descriptionKey": "life_tactics.result.tr03.description",
+      "designStatus": "candidate",
+      "formation": "4-3-3",
+      "isActive": false,
+      "nameTextKey": "life_tactics.result.tr03.name",
+      "quizId": "life_tactics",
+      "resultTemplateId": "football_formation",
+      "resultTypeId": "tr03",
+      "shareTextKey": "life_tactics.result.tr03.share",
+      "sortOrder": 3
+    },
+    {
+      "catchphraseKey": "life_tactics.result.tr04.catchphrase",
+      "dataVersion": "0.5.0",
+      "descriptionKey": "life_tactics.result.tr04.description",
+      "designStatus": "candidate",
+      "formation": "3-6-1",
+      "isActive": false,
+      "nameTextKey": "life_tactics.result.tr04.name",
+      "quizId": "life_tactics",
+      "resultTemplateId": "football_formation",
+      "resultTypeId": "tr04",
+      "shareTextKey": "life_tactics.result.tr04.share",
+      "sortOrder": 4
+    },
+    {
+      "catchphraseKey": "life_tactics.result.tr05.catchphrase",
+      "dataVersion": "0.5.0",
+      "descriptionKey": "life_tactics.result.tr05.description",
+      "designStatus": "candidate",
+      "formation": "3-5-2",
+      "isActive": false,
+      "nameTextKey": "life_tactics.result.tr05.name",
+      "quizId": "life_tactics",
+      "resultTemplateId": "football_formation",
+      "resultTypeId": "tr05",
+      "shareTextKey": "life_tactics.result.tr05.share",
+      "sortOrder": 5
+    },
+    {
+      "catchphraseKey": "life_tactics.result.tr06.catchphrase",
+      "dataVersion": "0.5.0",
+      "descriptionKey": "life_tactics.result.tr06.description",
+      "designStatus": "candidate",
+      "formation": "4-5-1",
+      "isActive": false,
+      "nameTextKey": "life_tactics.result.tr06.name",
+      "quizId": "life_tactics",
+      "resultTemplateId": "football_formation",
+      "resultTypeId": "tr06",
+      "shareTextKey": "life_tactics.result.tr06.share",
+      "sortOrder": 6
+    },
+    {
+      "catchphraseKey": "life_tactics.result.tr07.catchphrase",
+      "dataVersion": "0.5.0",
+      "descriptionKey": "life_tactics.result.tr07.description",
+      "designStatus": "candidate",
+      "formation": "6-3-1",
+      "isActive": false,
+      "nameTextKey": "life_tactics.result.tr07.name",
+      "quizId": "life_tactics",
+      "resultTemplateId": "football_formation",
+      "resultTypeId": "tr07",
+      "shareTextKey": "life_tactics.result.tr07.share",
+      "sortOrder": 7
+    },
+    {
+      "catchphraseKey": "life_tactics.result.tr08.catchphrase",
+      "dataVersion": "0.5.0",
+      "descriptionKey": "life_tactics.result.tr08.description",
+      "designStatus": "candidate",
+      "formation": "5-4-1",
+      "isActive": false,
+      "nameTextKey": "life_tactics.result.tr08.name",
+      "quizId": "life_tactics",
+      "resultTemplateId": "football_formation",
+      "resultTypeId": "tr08",
+      "shareTextKey": "life_tactics.result.tr08.share",
+      "sortOrder": 8
+    },
+    {
+      "catchphraseKey": "life_tactics.result.tr09.catchphrase",
+      "dataVersion": "0.5.0",
+      "descriptionKey": "life_tactics.result.tr09.description",
+      "designStatus": "candidate",
+      "formation": "5-3-2",
+      "isActive": false,
+      "nameTextKey": "life_tactics.result.tr09.name",
+      "quizId": "life_tactics",
+      "resultTemplateId": "football_formation",
+      "resultTypeId": "tr09",
+      "shareTextKey": "life_tactics.result.tr09.share",
+      "sortOrder": 9
+    },
+    {
+      "catchphraseKey": "life_tactics.result.tr10.catchphrase",
+      "dataVersion": "0.5.0",
+      "descriptionKey": "life_tactics.result.tr10.description",
+      "designStatus": "candidate",
+      "formation": "4-4-2",
+      "isActive": false,
+      "nameTextKey": "life_tactics.result.tr10.name",
+      "quizId": "life_tactics",
+      "resultTemplateId": "football_formation",
+      "resultTypeId": "tr10",
+      "shareTextKey": "life_tactics.result.tr10.share",
+      "sortOrder": 10
+    }
+  ],
+  "rule": {
+    "balanceMaxRange": 12,
+    "dominanceMinGap": 20,
+    "mappings": [
+      {
+        "firstDimensionId": null,
+        "kind": "balance",
+        "resultTypeId": "tr10",
+        "secondDimensionId": null
+      },
+      {
+        "firstDimensionId": "happiness",
+        "kind": "dominant",
+        "resultTypeId": "tr07",
+        "secondDimensionId": null
+      },
+      {
+        "firstDimensionId": "meaning",
+        "kind": "dominant",
+        "resultTypeId": "tr04",
+        "secondDimensionId": null
+      },
+      {
+        "firstDimensionId": "richness",
+        "kind": "dominant",
+        "resultTypeId": "tr01",
+        "secondDimensionId": null
+      },
+      {
+        "firstDimensionId": "happiness",
+        "kind": "mixed",
+        "resultTypeId": "tr08",
+        "secondDimensionId": "meaning"
+      },
+      {
+        "firstDimensionId": "happiness",
+        "kind": "mixed",
+        "resultTypeId": "tr09",
+        "secondDimensionId": "richness"
+      },
+      {
+        "firstDimensionId": "meaning",
+        "kind": "mixed",
+        "resultTypeId": "tr06",
+        "secondDimensionId": "happiness"
+      },
+      {
+        "firstDimensionId": "meaning",
+        "kind": "mixed",
+        "resultTypeId": "tr05",
+        "secondDimensionId": "richness"
+      },
+      {
+        "firstDimensionId": "richness",
+        "kind": "mixed",
+        "resultTypeId": "tr03",
+        "secondDimensionId": "happiness"
+      },
+      {
+        "firstDimensionId": "richness",
+        "kind": "mixed",
+        "resultTypeId": "tr02",
+        "secondDimensionId": "meaning"
+      }
+    ],
+    "ruleVersion": "life_rank_v1_preview",
+    "strategy": "range_gap_rank",
+    "tiePriority": [
+      "happiness",
+      "meaning",
+      "richness"
+    ]
+  },
+  "schemaVersion": 2,
+  "scoreMode": "independent_sum",
+  "sortOrder": 1,
+  "titleTextKey": "life_tactics.title"
+}

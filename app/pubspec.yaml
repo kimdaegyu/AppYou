@@ -76,8 +76,51 @@ flutter:
     - assets/data/0.3.0/preview/catalog.json
     - assets/data/0.3.0/preview/quizzes/
     - assets/data/0.3.0/preview/locales/
+    - assets/data/0.3.0/preview/pilots/life_tactics/scenario_v1.json
     - assets/data/0.3.0/release/catalog.json
     - assets/data/0.3.0/release/locales/
+    - assets/data/0.4.0/preview/catalog.json
+    - assets/data/0.4.0/preview/quizzes/
+    - assets/data/0.4.0/preview/locales/
+    - assets/data/0.4.0/preview/pilots/life_tactics/scenario_v1.json
+    - assets/data/0.4.0/release/catalog.json
+    - assets/data/0.4.0/release/locales/
+    - assets/data/0.5.0/preview/catalog.json
+    - assets/data/0.5.0/preview/quizzes/
+    - assets/data/0.5.0/preview/locales/
+    - assets/data/0.5.0/preview/pilots/life_tactics/scenario_v2.json
+    - assets/data/0.5.0/release/catalog.json
+    - assets/data/0.5.0/release/locales/
+    - assets/data/0.6.0/preview/catalog.json
+    - assets/data/0.6.0/preview/quizzes/
+    - assets/data/0.6.0/preview/locales/
+    - assets/data/0.6.0/preview/pilots/life_tactics/scenario_v2.json
+    - assets/data/0.6.0/release/catalog.json
+    - assets/data/0.6.0/release/locales/
+    - assets/data/0.7.0/preview/catalog.json
+    - assets/data/0.7.0/preview/quizzes/
+    - assets/data/0.7.0/preview/locales/
+    - assets/data/0.7.0/preview/pilots/life_tactics/scenario_v2.json
+    - assets/data/0.7.0/release/catalog.json
+    - assets/data/0.7.0/release/locales/
+    - assets/data/0.7.1/preview/catalog.json
+    - assets/data/0.7.1/preview/quizzes/
+    - assets/data/0.7.1/preview/locales/
+    - assets/data/0.7.1/preview/pilots/life_tactics/scenario_v2.json
+    - assets/data/0.7.1/release/catalog.json
+    - assets/data/0.7.1/release/locales/
+    - assets/data/0.8.0/preview/catalog.json
+    - assets/data/0.8.0/preview/quizzes/
+    - assets/data/0.8.0/preview/locales/
+    - assets/data/0.8.0/preview/pilots/life_tactics/scenario_v2.json
+    - assets/data/0.8.0/release/catalog.json
+    - assets/data/0.8.0/release/locales/
+    - assets/data/0.9.0/preview/catalog.json
+    - assets/data/0.9.0/preview/quizzes/
+    - assets/data/0.9.0/preview/locales/
+    - assets/data/0.9.0/preview/pilots/life_tactics/scenario_v2.json
+    - assets/data/0.9.0/release/catalog.json
+    - assets/data/0.9.0/release/locales/
 
   # To add assets to your application, add an assets section, like this:
   # assets:

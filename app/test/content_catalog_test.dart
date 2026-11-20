@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:look_at_you/core/fonts/app_font_loader.dart';
@@ -288,6 +289,9 @@ ContentBundle _sampleBundle() {
 }
 
 String _asset(String asset) {
+  if (asset.contains('/pilots/')) {
+    throw FlutterError('Unable to load asset: $asset');
+  }
   if (asset.endsWith('/catalog.json')) {
     return jsonEncode({
       'schemaVersion': 1,

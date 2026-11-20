@@ -1,12 +1,14 @@
 import 'dart:convert';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 
 import 'content_codec.dart';
 import 'content_models.dart';
 
 const contentDataVersion = '0.2.0';
-const pilotDataVersion = '0.3.0';
+const pilotDataVersion = '0.9.0';
+const scenarioPointVersions = {'0.5.0', '0.6.0', '0.7.0', '0.7.1', '0.8.0', '0.9.0'};
 const releaseLanguageCodes = ['ko', 'en', 'ja', 'pt-BR'];
 
 /// 생성 JSON을 한 번만 파싱한다. 실패한 요청은 캐시에 남기지 않는다.
@@ -42,15 +44,35 @@ class ContentRepository {
       for (final code in releaseLanguageCodes) {
         locales[code] = await _loadString('$root/locales/$code.json');
       }
+      final pilots = <ScenarioPilot>[];
+      if (channel == 'preview') {
+        final pilotFile = scenarioPointVersions.contains(version) ? 'scenario_v2.json' : 'scenario_v1.json';
+        final pilotJson = await _optionalString('$root/pilots/life_tactics/$pilotFile');
+        if (pilotJson != null) {
+          pilots.add(ContentCodec.parsePilot(pilotJson));
+        }
+      }
       return ContentCodec.parse(
         catalogJson: catalogJson,
         quizJsonById: quizJson,
         localeJsonByCode: locales,
+        pilots: pilots,
       );
     } on ContentLoadException {
       rethrow;
     } catch (error) {
       throw ContentLoadException('콘텐츠를 읽지 못했습니다. $error');
+    }
+  }
+
+  Future<String?> _optionalString(String asset) async {
+    try {
+      return await _loadString(asset);
+    } on FlutterError catch (error) {
+      if (error.message.contains('Unable to load asset')) {
+        return null;
+      }
+      rethrow;
     }
   }
 

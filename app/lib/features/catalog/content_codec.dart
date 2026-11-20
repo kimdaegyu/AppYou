@@ -27,6 +27,7 @@ abstract final class ContentCodec {
     required String catalogJson,
     required Map<String, String> quizJsonById,
     required Map<String, String> localeJsonByCode,
+    List<ScenarioPilot> pilots = const [],
   }) {
     final catalog = _object(_decode(catalogJson, 'catalog.json'), 'catalog.json');
     final schemaVersion = _schema(catalog, 'catalog.json');
@@ -57,6 +58,76 @@ abstract final class ContentCodec {
       dataVersion: dataVersion,
       channel: channel,
       quizzes: quizzes,
+      locales: locales,
+      pilots: pilots,
+    );
+  }
+
+  static ScenarioPilot parsePilot(String raw) {
+    const path = 'pilots/scenario.json';
+    final json = _object(_decode(raw, path), path);
+    final scenarios = <ScenarioContent>[];
+    final listed = _list(json, 'scenarios', path);
+    for (var index = 0; index < listed.length; index++) {
+      final item = _asMap(listed[index], '$path.scenarios[$index]');
+      final options = <ScenarioOptionContent>[];
+      final optionList = _list(item, 'options', '$path.scenarios[$index]');
+      for (var optionIndex = 0; optionIndex < optionList.length; optionIndex++) {
+        final option = _asMap(optionList[optionIndex], '$path.scenarios[$index].options[$optionIndex]');
+        final optionPath = '$path.scenarios[$index].options[$optionIndex]';
+        options.add(
+          ScenarioOptionContent(
+            optionId: _string(option, 'optionId', optionPath),
+            dimensionId: _string(option, 'dimensionId', optionPath),
+            labelTextKey: _string(option, 'labelTextKey', optionPath),
+            sortOrder: _int(option, 'sortOrder', optionPath),
+            pointsByDimension: option['pointsByDimension'] == null
+                ? const {}
+                : _intMap(option['pointsByDimension'], '$optionPath.pointsByDimension'),
+          ),
+        );
+      }
+      options.sort((a, b) => a.sortOrder.compareTo(b.sortOrder));
+      scenarios.add(
+        ScenarioContent(
+          scenarioId: _string(item, 'scenarioId', '$path.scenarios[$index]'),
+          promptTextKey: _string(item, 'promptTextKey', '$path.scenarios[$index]'),
+          sortOrder: _int(item, 'sortOrder', '$path.scenarios[$index]'),
+          options: options,
+        ),
+      );
+    }
+    scenarios.sort((a, b) => a.sortOrder.compareTo(b.sortOrder));
+    final locales = <String, LocaleCatalog>{};
+    final localeJson = _object(json['locales'], '$path.locales');
+    for (final entry in localeJson.entries) {
+      final body = _asMap(entry.value, '$path.locales.${entry.key}');
+      locales[entry.key] = LocaleCatalog(
+        locale: entry.key,
+        strings: _stringMap(body['strings'], '$path.locales.${entry.key}.strings'),
+        statuses: _stringMap(body['statuses'], '$path.locales.${entry.key}.statuses'),
+        origins: const {},
+      );
+    }
+    final scoringMode = _optionalString(json, 'scoringMode', path) ?? 'axis_count';
+    if (scoringMode != 'axis_count' && scoringMode != 'option_points') {
+      throw ContentLoadException('$path.scoringMode 를 지원하지 않습니다.');
+    }
+    if (scoringMode == 'option_points') {
+      for (final scenario in scenarios) {
+        for (final option in scenario.options) {
+          if (option.pointsByDimension.isEmpty) {
+            throw ContentLoadException('$path 의 ${option.optionId} 배점이 없습니다.');
+          }
+        }
+      }
+    }
+    return ScenarioPilot(
+      quizId: _string(json, 'quizId', path),
+      baseDataVersion: _string(json, 'baseDataVersion', path),
+      pilotVersion: _string(json, 'pilotVersion', path),
+      scoringMode: scoringMode,
+      scenarios: scenarios,
       locales: locales,
     );
   }
@@ -297,6 +368,23 @@ abstract final class ContentCodec {
       throw ContentLoadException('$path.$key 는 문자열이어야 합니다.');
     }
     return value.isEmpty ? null : value;
+  }
+
+  static Map<String, int> _intMap(Object? value, String path) {
+    if (value is! Map) {
+      throw ContentLoadException('$path 는 객체여야 합니다.');
+    }
+    final points = <String, int>{};
+    for (final entry in value.entries) {
+      if (entry.key is! String || entry.value is! int) {
+        throw ContentLoadException('$path 의 배점은 0 이상의 정수여야 합니다.');
+      }
+      if (entry.value as int < 0) {
+        throw ContentLoadException('$path 의 배점은 0 이상의 정수여야 합니다.');
+      }
+      points[entry.key as String] = entry.value as int;
+    }
+    return points;
   }
 
   static int _int(Map<String, Object?> json, String key, String path) {
