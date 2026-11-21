@@ -44,3 +44,23 @@
 ## 파일 관리
 
 검토본은 `design/saida/review/vNNN/saida_<식별자>_vNNN.png`와 같은 이름의 WebP로 묶는다. 수정안은 다음 버전에 저장한다. 승인 시 이 표에 승인 버전을 기록하고 PNG는 디자인 원본으로 보존한다. Flutter 연동 시 Cursor가 승인된 WebP만 `app/assets/images/saida/`로 복사하고 자산을 등록한다.
+
+
+## 나의 인생 전술 결과 전용 사이다
+
+2026-11-21 사용 확정. tr06·tr10에는 [D.C 로고 v003](../design/saida/review/v003/saida_dc_tr06_tr10_v003.zip), 나머지 8종에는 v002를 사용한다. 결과 화면과 공유 카드 모두 같은 448×448 투명 WebP를 사용한다.
+
+| 결과 ID | 전술 | 타입명 | 이미지 식별자 |
+|---|---|---|---|
+| tr01 | 4-2-4 | 불꽃 모험가 | saida_life_tactics_tr01 |
+| tr02 | 3-4-3 | 의미 있는 탐험가 | saida_life_tactics_tr02 |
+| tr03 | 4-3-3 | 즐거운 도전자 | saida_life_tactics_tr03 |
+| tr04 | 3-6-1 | 신념의 지휘관 | saida_life_tactics_tr04 |
+| tr05 | 3-5-2 | 꿈꾸는 설계자 | saida_life_tactics_tr05 |
+| tr06 | 4-5-1 | 따뜻한 조율자 | saida_life_tactics_tr06 |
+| tr07 | 6-3-1 | 평온의 수호자 | saida_life_tactics_tr07 |
+| tr08 | 5-4-1 | 다정한 지킴이 | saida_life_tactics_tr08 |
+| tr09 | 5-3-2 | 여유로운 자유인 | saida_life_tactics_tr09 |
+| tr10 | 4-4-2 | 인생의 올라운더 | saida_life_tactics_tr10 |
+
+v002 승인본은 `image/saida_style_guide.png`의 얼굴과 털 표현을 기준으로 v001의 포즈·표정·축구 소품을 다시 그린 이미지다. [타입별 미리보기](../design/saida/review/v002/saida_life_tactics_preview_v002.jpg)와 [투명 PNG·WebP 10쌍](../design/saida/review/v002/saida_life_tactics_v002.zip)에서 확인할 수 있다.

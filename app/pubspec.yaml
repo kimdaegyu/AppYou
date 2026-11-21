@@ -61,6 +61,8 @@ flutter:
 
   # 글꼴은 flutter/fonts에 넣지 않는다. 선택한 언어만 rootBundle과 FontLoader로 읽는다.
   assets:
+    - assets/images/life_tactics/
+    - assets/images/saida/
     - assets/fonts/sources.json
     - assets/fonts/pretendard/
     - assets/fonts/pretendard_std/

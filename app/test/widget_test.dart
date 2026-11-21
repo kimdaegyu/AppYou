@@ -1,30 +1,61 @@
-// This is a basic Flutter widget test.
-//
-// To perform an interaction with a widget in your test, use the WidgetTester
-// utility in the flutter_test package. For example, you can send tap and scroll
-// gestures. You can also use WidgetTester to find child widgets in the widget
-// tree, read text, and verify that the values of widget properties are correct.
-
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:look_at_you/core/fonts/app_font_loader.dart';
+import 'package:look_at_you/core/locale/app_locale_store.dart';
+import 'package:look_at_you/features/catalog/content_repository.dart';
+import 'package:look_at_you/features/catalog/content_text.dart';
+import 'package:look_at_you/main.dart';
 import 'package:material_ui/material_ui.dart';
 
-import 'package:look_at_you/main.dart';
-
 void main() {
-  testWidgets('Counter increments smoke test', (WidgetTester tester) async {
-    // Build our app and trigger a frame.
-    await tester.pumpWidget(const MyApp());
+  TestWidgetsFlutterBinding.ensureInitialized();
 
-    // Verify that our counter starts at 0.
-    expect(find.text('0'), findsOneWidget);
-    expect(find.text('1'), findsNothing);
+  testWidgets(
+    'home opens life tactics and leaves the public catalog inactive',
+    (tester) async {
+      final bundle = await tester.runAsync(
+        () => ContentRepository().load(
+          version: pilotDataVersion,
+          channel: 'preview',
+        ),
+      );
+      final release = await tester.runAsync(
+        () => ContentRepository().load(
+          version: pilotDataVersion,
+          channel: 'release',
+        ),
+      );
+      expect(bundle, isNotNull);
+      expect(bundle!.quiz('life_tactics')!.isActive, isFalse);
+      expect(release!.quizzes, isEmpty);
+      expect(release.pilots, isEmpty);
 
-    // Tap the '+' icon and trigger a frame.
-    await tester.tap(find.byIcon(Icons.add));
-    await tester.pump();
+      await tester.pumpWidget(
+        MyApp(
+          preview: bundle,
+          store: MemoryLocaleStore()..value = 'ko',
+          deviceTags: const ['ko'],
+          loader: AppFontLoader(
+            loadBytes: (_) async => ByteData(0),
+            register: (_, _) async {},
+          ),
+        ),
+      );
+      await tester.pump();
 
-    // Verify that our counter has incremented.
-    expect(find.text('0'), findsNothing);
-    expect(find.text('1'), findsOneWidget);
-  });
+      expect(find.byIcon(Icons.add), findsNothing);
+      expect(find.byKey(const Key('home-life-tactics')), findsOneWidget);
+      expect(find.text('나의 인생 전술'), findsOneWidget);
+      expect(find.byKey(const Key('pilot-start')), findsOneWidget);
+      expect(find.text('어떤 테스트를 해 볼까요?'), findsNothing);
+      final wealth = bundle.quiz('wealth_four');
+      expect(wealth, isNotNull);
+      expect(wealth!.isActive, isFalse);
+      final wealthTitle = AppTextBook(bundle.locales)
+          .resolve('ko', wealth.titleTextKey)
+          .text;
+      expect(find.text(wealthTitle), findsOneWidget);
+      expect(find.text('Coming Soon...'), findsOneWidget);
+    },
+  );
 }

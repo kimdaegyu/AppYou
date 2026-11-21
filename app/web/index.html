@@ -17,6 +17,13 @@
   <base href="$FLUTTER_BASE_HREF">
 
   <meta charset="UTF-8">
+  <meta name="color-scheme" content="only light">
+  <style>
+    :root {
+      color-scheme: only light;
+      background-color: #fff9f2;
+    }
+  </style>
   <meta content="IE=Edge" http-equiv="X-UA-Compatible">
   <meta name="description" content="A new Flutter project.">
 
@@ -35,13 +42,14 @@
   <!-- iOS meta tags & icons -->
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black">
-  <meta name="apple-mobile-web-app-title" content="look_at_you">
+  <meta name="apple-mobile-web-app-title" content="Look At You">
   <link rel="apple-touch-icon" href="icons/Icon-192.png">
 
   <!-- Favicon -->
-  <link rel="icon" type="image/png" href="favicon.png"/>
+  <link rel="icon" type="image/png" href="favicon-dc-v1.png"/>
 
-  <title>look_at_you</title>
+  <title>Look At You</title>
+  <meta property="og:title" content="Look At You">
   <link rel="manifest" href="manifest.json">
 </head>
 <body>
@@ -53,6 +61,9 @@
     For more details:
     * https://docs.flutter.dev/platform-integration/web/initialization
   -->
+  <script src="https://t1.kakaocdn.net/kakao_js_sdk/2.8.5/kakao.min.js" integrity="sha384-v6JKY3z4FUkWq21oZDHZe74YvuPk/WUrVLrDHTBojHXClOSa3iXy7sCXPY1jkFbj" crossorigin="anonymous"></script>
+  <script src="kakao_app.js"></script>
+  <script src="save_image.js?v=2"></script>
   <script src="flutter_bootstrap.js" async></script>
 </body>
 </html>

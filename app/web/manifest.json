@@ -1,6 +1,6 @@
 {
-    "name": "look_at_you",
-    "short_name": "look_at_you",
+    "name": "Look At You",
+    "short_name": "Look At You",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0175C2",
