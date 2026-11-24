@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:ui' as ui;
 
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -13,6 +14,8 @@ import 'package:look_at_you/features/life_tactics/pilot_checkpoint.dart';
 import 'package:look_at_you/features/life_tactics/pilot_host.dart';
 import 'package:look_at_you/features/life_tactics/pilot_pages.dart';
 import 'package:look_at_you/features/life_tactics/pilot_session_store_memory.dart';
+import 'package:look_at_you/features/catalog/content_models.dart';
+import 'package:look_at_you/features/life_tactics/pilot_kakao_image.dart';
 import 'package:look_at_you/features/life_tactics/pilot_share_capture.dart';
 import 'package:look_at_you/features/life_tactics/pilot_share_file.dart';
 import 'package:look_at_you/features/life_tactics/pilot_share_gateway.dart';
@@ -24,8 +27,10 @@ void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
   final previousCanShare = pilotCanShareLink;
+  final previousCanShareFile = pilotCanShareFile;
   final previousKakaoBrowser = pilotKakaoTalkBrowser;
   final previousShare = pilotShareLink;
+  final previousShareResult = pilotShareResult;
   final previousKakao = pilotSendKakao;
   final previousCopy = pilotCopyText;
   final previousSave = pilotSaveFile;
@@ -33,8 +38,10 @@ void main() {
 
   tearDown(() {
     pilotCanShareLink = previousCanShare;
+    pilotCanShareFile = previousCanShareFile;
     pilotKakaoTalkBrowser = previousKakaoBrowser;
     pilotShareLink = previousShare;
+    pilotShareResult = previousShareResult;
     pilotSendKakao = previousKakao;
     pilotCopyText = previousCopy;
     pilotSaveFile = previousSave;
@@ -70,6 +77,68 @@ void main() {
     expect(pilotImageOpensForSaving('Android Chrome/120 Mobile'), isFalse);
   });
 
+  test('kakao feed uses the card image, title, and diagnosis link', () {
+    final message = PilotKakaoShare(
+      title: '나의 인생 전술 - 불꽃 모험가',
+      buttonTitle: '나도 진단하기',
+      webUrl: Uri.parse(_publicLink),
+      mobileWebUrl: Uri.parse(_publicLink),
+      imageUrl: 'https://k.kakaocdn.net/dn/card.png',
+      imageWidth: 1080,
+      imageHeight: 1440,
+    );
+    final settings = pilotKakaoFeedSettings(message);
+    expect(settings['objectType'], 'feed');
+    final content = settings['content']! as Map;
+    expect(content['title'], '나의 인생 전술 - 불꽃 모험가');
+    expect(content['imageUrl'], message.imageUrl);
+    expect(content['imageWidth'], 1080);
+    expect(content['imageHeight'], 1440);
+    expect(content.containsKey('description'), isFalse);
+    expect(content['link'], {
+      'webUrl': _publicLink,
+      'mobileWebUrl': _publicLink,
+    });
+    final buttons = settings['buttons']! as List;
+    expect(buttons, [
+      {
+        'title': '나도 진단하기',
+        'link': {'webUrl': _publicLink, 'mobileWebUrl': _publicLink},
+      },
+    ]);
+    expect(settings.containsKey('text'), isFalse);
+    expect(_publicLink.contains('resultTypeId'), isFalse);
+  });
+
+  test('kakao feed frame keeps ratios from 2:1 through 3:4', () {
+    expect(pilotKakaoFeedFrame(width: 1080, height: 1200), (
+      width: 1080,
+      height: 1200,
+    ));
+    final tall = pilotKakaoFeedFrame(width: 1080, height: 1800);
+    expect(tall.height, 1800);
+    expect(tall.width / tall.height, closeTo(3 / 4, 0.001));
+    expect(tall.width, greaterThan(1080));
+    final wide = pilotKakaoFeedFrame(width: 2000, height: 800);
+    expect(wide.width, 2000);
+    expect(wide.width / wide.height, closeTo(2, 0.001));
+  });
+
+  test('a tall card is padded onto the kakao feed canvas', () async {
+    final tall = await _solidPng(12, 40);
+    final fitted = await fitPilotKakaoFeedPng(tall);
+    expect(fitted.height, 40);
+    expect(fitted.width / fitted.height, closeTo(0.75, 0.02));
+    expect(pngDimensions(fitted.bytes), (width: fitted.width, height: 40));
+    expect(fitted.bytes, isNot(tall));
+
+    final square = await _solidPng(20, 20);
+    final same = await fitPilotKakaoFeedPng(square);
+    expect(same.bytes, square);
+    expect(same.width, 20);
+    expect(same.height, 20);
+  });
+
   test('diagnosis link keeps only the public quiz id', () {
     final link = pilotDiagnosisLink('life_tactics');
     expect(
@@ -79,9 +148,12 @@ void main() {
     expect(link.queryParameters, {'quizId': 'life_tactics'});
   });
 
-  testWidgets('link share opens the sheet without a file', (tester) async {
+  testWidgets('file-capable browsers share the result and URL without a file', (
+    tester,
+  ) async {
     final saved = <PilotShareFile>[];
     final shared = <PilotShareLink>[];
+    pilotCanShareFile = () => true;
     var shareResult = PilotShareFileResult.opened;
     final copied = <String>[];
     pilotCanShareLink = (_) => true;
@@ -175,7 +247,7 @@ void main() {
       await tester.ensureVisible(find.byKey(const Key('pilot-copy-link')));
       await tester.tap(find.byKey(const Key('pilot-copy-link')));
       await tester.pump();
-      expect(copied, [_publicLink]);
+      expect(copied, ['$_koreanShare\n$_publicLink']);
       expect(saved, isEmpty);
       expect(find.text('진단 링크를 복사했어요. 채팅창에 붙여넣어 주세요.'), findsOneWidget);
       expect(find.byKey(const Key('pilot-share-link')), findsNothing);
@@ -185,7 +257,7 @@ void main() {
       shareResult = PilotShareFileResult.failed;
       await tester.tap(find.byKey(const Key('pilot-share-action')));
       await tester.pump();
-      expect(copied, [_publicLink]);
+      expect(copied, ['$_koreanShare\n$_publicLink']);
       expect(find.text(_publicLink), findsNothing);
       expect(find.byKey(const Key('pilot-copy-link')), findsOneWidget);
       expect(saved, isEmpty);
@@ -218,66 +290,43 @@ void main() {
     await tester.pump();
     expect(saved, isEmpty);
     expect(find.byKey(const Key('pilot-share-notice')), findsNothing);
-    expect(find.text(_publicLink), findsOneWidget);
+    expect(find.text('$_koreanShare\n$_publicLink'), findsOneWidget);
     expect(find.byKey(const Key('pilot-share-card')), findsOneWidget);
   });
 
-  testWidgets('kakao in-app share sends the result name and diagnosis link', (
+  testWidgets('Kakao uses the hosted result image on the first tap', (
     tester,
   ) async {
-    final shared = <PilotShareLink>[];
-    final kakao = <PilotKakaoShare>[];
-    var kakaoResult = PilotShareFileResult.opened;
-    pilotCanShareLink = (_) => false;
+    final messages = <PilotKakaoShare>[];
+    pilotCanShareLink = (_) => true;
+    pilotCanShareFile = () => true;
     pilotKakaoTalkBrowser = () => true;
-    pilotShareLink = (link) async {
-      shared.add(link);
-      return PilotShareFileResult.opened;
+    var result = PilotShareFileResult.opened;
+    pilotSendKakao = (message) async {
+      messages.add(message);
+      return PilotKakaoDelivery(result: result);
     };
-    pilotSendKakao = (message) {
-      kakao.add(message);
-      return Future.value(kakaoResult);
-    };
-    pilotCopyText = (_) async => true;
     _holdCapture();
     final host = await _host(tester);
     final controller = await _locale();
     addTearDown(controller.dispose);
     await _show(tester, host, controller, const Size(400, 900));
-    await tester.pump();
-    expect(_button(tester).label, '카카오톡으로 공유하기');
-    expect(find.byKey(const Key('pilot-copy-link')), findsNothing);
+    await _ready(tester);
+    await tester.tap(find.byKey(const Key('pilot-share-action')));
+    expect(messages.single.imageBytes, isNull);
     expect(
-      find.text('이 브라우저에서는 공유창을 열 수 없어요. 아래 진단 링크를 연 뒤 브라우저 메뉴에서 공유를 선택해 주세요.'),
-      findsNothing,
+      messages.single.imageUrl,
+      '$pilotPublicSite/result-cards/look-at-you_life-tactics_tr10_ko.png',
     );
-
+    expect(messages.single.webUrl.toString(), _publicLink);
+    await tester.pump();
+    _score(host, const {'happiness': 17, 'meaning': 21, 'richness': 26});
+    await _ready(tester);
+    result = PilotShareFileResult.failed;
     await tester.tap(find.byKey(const Key('pilot-share-action')));
     await tester.pump();
-    expect(shared, isEmpty);
-    expect(kakao, hasLength(1));
-    expect(kakao.single.text, '인생의 올라운더');
-    expect(kakao.single.buttonTitle, '나도 진단하기');
-    expect(kakao.single.webUrl.toString(), _publicLink);
-    expect(kakao.single.mobileWebUrl.toString(), _publicLink);
-    expect(kakao.single.webUrl.queryParameters, {'quizId': 'life_tactics'});
-    expect(find.byKey(const Key('pilot-share-notice')), findsNothing);
-    expect(find.byKey(const Key('pilot-copy-link')), findsNothing);
-    expect(find.byKey(const Key('pilot-share-card')), findsOneWidget);
-
-    kakaoResult = PilotShareFileResult.cancelled;
-    await tester.tap(find.byKey(const Key('pilot-share-action')));
-    await tester.pump();
-    expect(find.byKey(const Key('pilot-copy-link')), findsNothing);
-    expect(find.byKey(const Key('pilot-share-notice')), findsNothing);
-    expect(find.byKey(const Key('pilot-share-card')), findsOneWidget);
-
-    kakaoResult = PilotShareFileResult.failed;
-    await tester.tap(find.byKey(const Key('pilot-share-action')));
-    await tester.pump();
-    expect(find.byKey(const Key('pilot-copy-link')), findsOneWidget);
-    expect(find.byKey(const Key('pilot-share-notice')), findsNothing);
-    expect(find.text(_publicLink), findsNothing);
+    expect(messages.last.imageUrl, endsWith('tr01_ko.png'));
+    expect(find.byKey(const Key('pilot-share-link-only')), findsOneWidget);
   });
 
   testWidgets('link share still works when the image cannot be prepared', (
@@ -401,6 +450,17 @@ void main() {
     hold = true;
     await controller.select('en');
     await tester.pump();
+    expect(find.text('공유 카드를 만드는 중…'), findsNothing);
+    expect(find.text('Making the share card…'), findsNothing);
+    await tester.pump(const Duration(milliseconds: 400));
+    expect(find.text('Making the share card…'), findsOneWidget);
+    expect(
+      find.descendant(
+        of: find.byKey(const Key('pilot-share-card')),
+        matching: find.text('Making the share card…'),
+      ),
+      findsNothing,
+    );
     expect(_saveButton(tester).onPressed, isNull);
     expect(_button(tester).onPressed, isNotNull);
     await tester.tap(find.byKey(const Key('pilot-share-action')));
@@ -512,8 +572,61 @@ void main() {
     await tester.pump();
     final card = tester.getRect(find.byKey(const Key('pilot-share-card')));
     expect(card.height, greaterThan(card.width));
-    expect(find.textContaining(ending), findsOneWidget);
+    final descriptionBottom = tester
+        .getBottomLeft(find.textContaining(ending))
+        .dy;
+    final dividerTop = tester
+        .getTopLeft(find.byKey(const Key('pilot-share-divider')))
+        .dy;
+    expect(dividerTop - descriptionBottom, closeTo(6, 0.01));
     expect(find.byKey(const Key('pilot-marker-rows-4-2-4')), findsOneWidget);
+    expect(
+      tester
+          .widget<PilotImage>(
+            find.descendant(
+              of: find.byKey(
+                const Key(
+                  'pilot-share-saida:assets/images/saida/saida_life_tactics_tr01_v002.webp',
+                ),
+              ),
+              matching: find.byType(PilotImage),
+            ),
+          )
+          .backdrop,
+      isNull,
+    );
+  });
+
+  testWidgets('a png that finishes within 400ms skips the making notice', (
+    tester,
+  ) async {
+    _holdCapture();
+    final host = await _host(tester);
+    final controller = await _locale();
+    addTearDown(controller.dispose);
+    await _show(tester, host, controller, const Size(400, 900));
+    await _ready(tester);
+    await tester.pump(const Duration(milliseconds: 500));
+    expect(find.text('공유 카드를 만드는 중…'), findsNothing);
+    expect(_saveButton(tester).onPressed, isNotNull);
+    expect(_button(tester).onPressed, isNotNull);
+  });
+
+  testWidgets('closing the card ignores a late png', (tester) async {
+    final gate = Completer<void>();
+    pilotCaptureCard = (context, {required card, required assets}) async {
+      await gate.future;
+      return Uint8List.fromList(const [1]);
+    };
+    final host = await _host(tester);
+    final controller = await _locale();
+    addTearDown(controller.dispose);
+    await _show(tester, host, controller, const Size(400, 900));
+    await tester.pump(const Duration(milliseconds: 100));
+    await tester.pumpWidget(const SizedBox.shrink());
+    gate.complete();
+    await tester.pump(const Duration(seconds: 1));
+    expect(tester.takeException(), isNull);
   });
 }
 
@@ -598,6 +711,56 @@ Future<void> _show(
     ),
   );
   await tester.pump();
+}
+
+Future<Uint8List> _solidPng(int width, int height) async {
+  final recorder = ui.PictureRecorder();
+  final canvas = ui.Canvas(recorder);
+  canvas.drawRect(
+    ui.Rect.fromLTWH(0, 0, width.toDouble(), height.toDouble()),
+    ui.Paint()..color = const ui.Color(0xFFA44B12),
+  );
+  final image = await recorder.endRecording().toImage(width, height);
+  try {
+    final data = await image.toByteData(format: ui.ImageByteFormat.png);
+    return data!.buffer.asUint8List();
+  } finally {
+    image.dispose();
+  }
+}
+
+void _score(PilotHost host, Map<String, int> rawTotals) {
+  final grouped = <String, List<QuestionContent>>{};
+  for (final question in host.questionItems) {
+    grouped.putIfAbsent(question.dimensionId, () => []).add(question);
+  }
+  for (final entry in rawTotals.entries) {
+    final questions = grouped[entry.key]!;
+    final parts = _parts(entry.value, questions.length);
+    for (var index = 0; index < questions.length; index++) {
+      final question = questions[index];
+      final wanted = question.reverse ? 6 - parts[index] : parts[index];
+      final option = host.quiz!
+          .optionsFor(question.scaleId)
+          .firstWhere((item) => item.scoreValue == wanted);
+      host.questions!.select(question.questionId, option.optionId);
+    }
+  }
+  host.finish();
+}
+
+List<int> _parts(int total, int count) {
+  final values = List<int>.filled(count, 1);
+  var left = total - count;
+  var index = 0;
+  while (left > 0) {
+    final room = 5 - values[index];
+    final take = left < room ? left : room;
+    values[index] += take;
+    left -= take;
+    index = (index + 1) % count;
+  }
+  return values;
 }
 
 void _answer(PilotHost host, List<int> scores) {

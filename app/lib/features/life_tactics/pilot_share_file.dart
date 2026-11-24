@@ -24,7 +24,10 @@ class PilotShareFile {
 }
 
 /// 운영체제 공유창을 연 결과. 창이 열렸다는 뜻이지 전송 완료가 아니다.
-enum PilotShareFileResult { opened, cancelled, unavailable, failed }
+///
+/// [needsGesture]는 이미지 업로드는 끝났지만, 비동기 작업 뒤에 공유창이
+/// 막혀 다음 탭에서 바로 열어야 하는 상태다.
+enum PilotShareFileResult { opened, cancelled, unavailable, failed, needsGesture }
 
 /// 저장이 파일을 내려받았는지, 브라우저가 이미지를 열었는지.
 enum PilotSaveFileResult { downloaded, opened, failed }

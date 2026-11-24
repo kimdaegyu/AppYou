@@ -24,14 +24,14 @@
       ]
     }
   ],
-  "machineDraftValues": 390,
+  "machineDraftValues": 414,
   "releaseQuizIds": [],
   "schemaVersion": 2,
   "unreviewedKeys": {
-    "en": 152,
-    "ja": 152,
-    "ko": 152,
-    "pt-BR": 152
+    "en": 160,
+    "ja": 160,
+    "ko": 160,
+    "pt-BR": 160
   },
   "warnings": [
     "QuizData.xlsx / Quizzes / 2행 / QuizId: 출시 목록에서 제외합니다. 진단이 비활성; 판정 규칙이 승인 전; 활성 문항이 검수 완료가 아님; 승인된 활성 결과 타입이 없음; 출시 언어 번역이 검수 완료가 아님",

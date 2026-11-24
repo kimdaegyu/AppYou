@@ -19,12 +19,16 @@ class AppButton extends StatelessWidget {
     this.variant = AppButtonVariant.primary,
     this.semanticLabel,
     this.expand,
+    this.reservedLabels = const [],
   });
 
   final String label;
   final VoidCallback? onPressed;
   final AppButtonVariant variant;
   final String? semanticLabel;
+
+  /// 문구가 바뀌어도 버튼 크기를 유지할 때 함께 재는 문구.
+  final List<String> reservedLabels;
 
   /// null이면 Primary·Secondary는 가로로 늘리고 Text는 내용 너비를 유지한다.
   final bool? expand;
@@ -34,11 +38,17 @@ class AppButton extends StatelessWidget {
     return FilledButton(
       onPressed: onPressed,
       style: _style(context),
-      child: Text(
-        label,
-        textAlign: TextAlign.center,
-        semanticsLabel: semanticLabel,
-      ),
+      child: reservedLabels.isEmpty
+          ? Text(
+              label,
+              textAlign: TextAlign.center,
+              semanticsLabel: semanticLabel,
+            )
+          : _ReservedButtonLabel(
+              label: label,
+              reserved: reservedLabels,
+              semanticLabel: semanticLabel,
+            ),
     );
   }
 
@@ -119,5 +129,35 @@ class AppButton extends StatelessWidget {
       AppButtonVariant.secondary => const BorderSide(color: AppColors.border),
       _ => BorderSide.none,
     };
+  }
+}
+
+class _ReservedButtonLabel extends StatelessWidget {
+  const _ReservedButtonLabel({
+    required this.label,
+    required this.reserved,
+    required this.semanticLabel,
+  });
+
+  final String label;
+  final List<String> reserved;
+  final String? semanticLabel;
+
+  @override
+  Widget build(BuildContext context) {
+    final extras = reserved.where((text) => text != label);
+    return Stack(
+      alignment: Alignment.center,
+      children: [
+        for (final text in extras)
+          ExcludeSemantics(
+            child: Opacity(
+              opacity: 0,
+              child: Text(text, textAlign: TextAlign.center),
+            ),
+          ),
+        Text(label, textAlign: TextAlign.center, semanticsLabel: semanticLabel),
+      ],
+    );
   }
 }

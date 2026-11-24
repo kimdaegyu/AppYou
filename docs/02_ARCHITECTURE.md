@@ -1,5 +1,5 @@
 # 앱과 데이터 아키텍처
-제품 진입점 `app/lib/main.dart`는 0.9.0 미리보기 번들로 나의 인생 전술 파일럿을 연다. 같은 탭의 sessionStorage에 회차 위치와 응답 ID를 남겨 새로고침 뒤 그 버전으로 다시 계산한다. 홈에서 인생 전술만 시작하고, 기본 18문항과 장면 6개 뒤에 결과와 앱 안 공유 카드 미리보기를 보여 준다. 개발용 미리보기는 `flutter run -t lib/ui_preview.dart`로 계속 연다. 테마·폰트·공통 위젯과 Excel 번들 로딩이 연결되어 있고, 0.9.0 미리보기에서 응답·정규화 점수·결과 ID를 계산한다. 0.3.0·0.4.0·0.5.0·0.6.0·0.7.0·0.7.1·0.8.0 회차는 그 버전 번들로 다시 해석한다. 출시 카탈로그는 비어 있고 판정하지 않는다. 결과 카드는 공개 진단 링크를 공유하고, 이미지는 저장 버튼으로만 받는다. 시스템 공유가 없으면 카카오톡 인앱에서만 JavaScript SDK의 기본 텍스트 메시지로 보낸다.
+제품 진입점 `app/lib/main.dart`는 0.9.0 미리보기 번들로 나의 인생 전술 파일럿을 연다. 같은 탭의 sessionStorage에 회차 위치와 응답 ID를 남겨 새로고침 뒤 그 버전으로 다시 계산한다. 홈에서 인생 전술만 시작하고, 기본 18문항과 장면 6개 뒤에 결과와 앱 안 공유 카드 미리보기를 보여 준다. 개발용 미리보기는 `flutter run -t lib/ui_preview.dart`로 계속 연다. 테마·폰트·공통 위젯과 Excel 번들 로딩이 연결되어 있고, 0.9.0 미리보기에서 응답·정규화 점수·결과 ID를 계산한다. 0.3.0·0.4.0·0.5.0·0.6.0·0.7.0·0.7.1·0.8.0 회차는 그 버전 번들로 다시 해석한다. 출시 카탈로그는 비어 있고 판정하지 않는다. 결과 카드는 같은 PNG를 파일 공유와 카카오 피드에 쓰고, 이미지는 저장 버튼으로도 받는다. 시스템 공유가 없으면 카카오톡 인앱에서만 JavaScript SDK의 피드 메시지로 보낸다.
 
 |위치|책임|
 |---|---|
@@ -9,7 +9,7 @@
 |app/lib/features/home, settings|공개 카탈로그와 설정 화면. 이번 파일럿 홈은 life_tactics에 있다|
 |app/lib/features/quiz|QuestionId → OptionId 세션, 유리수 채점, range_gap_rank 판정. 위젯에 의존하지 않는다. 승인 전 규칙은 allowPending인 미리보기 세션만 실행|
 |app/lib/features/result|이후 진단의 결과 템플릿 선택. 인생 전술 결과 화면은 life_tactics에 있다|
-|app/lib/features/sharing|진단 링크는 life_tactics 카드에서 공개 주소와 quizId로 만든다. 카카오 전송은 웹 JavaScript SDK를 카드 화면에서 호출한다|
+|app/lib/features/sharing|진단 링크는 life_tactics 카드에서 공개 주소와 quizId로 만든다. 카카오 피드는 그 카드의 PNG를 웹 JavaScript SDK로 올린 뒤 카드 화면에서 보낸다. 로딩 문구는 캡처 밖에 둔다|
 |app/test, tools/data/tests|위젯·순수 Dart 검증, Excel·JSON 계약 검증|
 
 실행 순서는 번들 로드 → 같은 버전의 참조 해석 → 응답 수집 → ScoreMode에 따른 축 점수 → 규칙으로 ResultTypeId 선택 → 화면 템플릿과 번역 적용이다. 0.2.0은 schemaVersion 1이라 목록과 문구만 읽고 판정하지 않는다. 0.3.0은 schemaVersion 2이고 life_tactics에만 `life_rank_v1_preview` 규칙이 있다. 점수는 `100 × Σ[w × (x−L)/(U−L)] / Σw`이며 비교 전에 반올림하지 않는다. 표시만 소수 첫째 자리 half-up이다. pending 규칙은 미리보기에서 명시적으로 연 세션만 실행하고 결과에 미리보기 상태를 붙인다. 실패하면 결과를 만들지 않는다. wealth_four에는 이 전략을 넣지 않는다. 규칙이나 템플릿이 준비되지 않은 진단은 출시 카탈로그에서 제외한다.

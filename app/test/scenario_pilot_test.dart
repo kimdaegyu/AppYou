@@ -262,7 +262,7 @@ void main() {
       await tap(const Key('pilot-next'));
     }
     expect(find.byKey(const Key('pilot-result')), findsNothing);
-    expect(find.text('상황 선택 1 / 6'), findsOneWidget);
+    expect(find.text('Situation 1 / 6'), findsOneWidget);
 
     await tap(const Key('pilot-scenario-back'));
     expect(find.byKey(const Key('pilot-question')), findsOneWidget);
@@ -310,19 +310,19 @@ void main() {
       tester
           .widget<Text>(find.byKey(const Key('pilot-scenario-count-happiness')))
           .data,
-      contains('6점'),
+      contains('6 points'),
     );
     expect(
       tester
           .widget<Text>(find.byKey(const Key('pilot-scenario-count-meaning')))
           .data,
-      contains('6점'),
+      contains('6 points'),
     );
     expect(
       tester
           .widget<Text>(find.byKey(const Key('pilot-scenario-count-richness')))
           .data,
-      contains('6점'),
+      contains('6 points'),
     );
     final record = tester
         .widget<Text>(find.byKey(const Key('pilot-record')))

@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:typed_data';
 import 'dart:ui' as ui;
 
@@ -19,10 +20,12 @@ import 'pilot_checkpoint.dart';
 import 'pilot_feedback.dart';
 import 'pilot_home_order.dart';
 import 'pilot_host.dart';
+import 'pilot_share_action.dart' show samsungInternetBrowser;
 import 'pilot_share_capture.dart';
 import 'pilot_share_file.dart';
 import 'pilot_share_gateway.dart';
 import 'pilot_share_link.dart';
+import 'pilot_visual.dart';
 
 /// 화면 전환 시간을 없애 뒤로 가기가 문항 위치에 바로 닿게 한다.
 class PilotRoute<T> extends MaterialPageRoute<T> {
@@ -141,28 +144,35 @@ class _LifeTacticsHomeCard extends StatelessWidget {
               top: Radius.circular(AppRadius.card),
             ),
             child: SizedBox(
+              key: const Key('pilot-home-art'),
               height: 220,
               width: double.infinity,
-              child: Stack(
-                fit: StackFit.expand,
-                children: [
-                  PilotImage(
-                    asset: LifeTacticsArt.stadium,
-                    fit: BoxFit.cover,
-                    retryLabel: retry,
-                  ),
-                  Align(
-                    alignment: Alignment.bottomRight,
-                    child: SizedBox(
-                      height: 150,
-                      child: PilotImage(
-                        asset: LifeTacticsArt.coach,
-                        fit: BoxFit.contain,
-                        retryLabel: retry,
+              child: ColoredBox(
+                color: AppColors.background,
+                child: Stack(
+                  fit: StackFit.expand,
+                  children: [
+                    PilotImage(
+                      asset: LifeTacticsArt.stadium,
+                      fit: BoxFit.cover,
+                      retryLabel: retry,
+                    ),
+                    Align(
+                      alignment: Alignment.bottomRight,
+                      child: SizedBox(
+                        key: const Key('pilot-home-saida'),
+                        width: 150,
+                        height: 150,
+                        child: PilotImage(
+                          asset: LifeTacticsArt.coach,
+                          fit: BoxFit.contain,
+                          backdrop: null,
+                          retryLabel: retry,
+                        ),
                       ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
           ),
@@ -532,7 +542,12 @@ class PilotResultPage extends StatelessWidget {
           final retry = _bundleText(
             bundle,
             code,
-            'life_tactics.pilot.imageRetry',
+            'life_tactics.pilot.shareRetry',
+          );
+          final imageLoading = _bundleText(
+            bundle,
+            code,
+            'life_tactics.pilot.resultImageLoading',
           );
           String axisName(String id) {
             return _bundleText(
@@ -586,6 +601,7 @@ class PilotResultPage extends StatelessWidget {
                         rows: rows,
                         labels: _lineLabels(bundle, code, quiz),
                         retryLabel: retry,
+                        loadingLabel: imageLoading,
                       ),
                     ],
                   ),
@@ -766,11 +782,16 @@ class _PilotSharePageState extends State<PilotSharePage> {
   Uint8List? _png;
   String? _signature;
   String? _noticeKey;
-  String? _manualUrl;
+  String? _manualShareText;
   var _offerCopy = false;
+  var _offerRetry = false;
+  var _offerLinkOnly = false;
   var _preparing = false;
+  var _showCardNotice = false;
   var _acting = false;
   var _captureSerial = 0;
+  var _kakaoSerial = 0;
+  Timer? _cardTimer;
 
   PilotHost get host => widget.host;
 
@@ -789,6 +810,7 @@ class _PilotSharePageState extends State<PilotSharePage> {
   @override
   void dispose() {
     _captureSerial += 1;
+    _cardTimer?.cancel();
     host.removeListener(_sync);
     super.dispose();
   }
@@ -807,26 +829,39 @@ class _PilotSharePageState extends State<PilotSharePage> {
     if (signature == _signature && (_png != null || _preparing)) {
       return;
     }
+    _cardTimer?.cancel();
+    final serial = ++_captureSerial;
     setState(() {
       _signature = signature;
       _png = null;
       _noticeKey = null;
-      _manualUrl = null;
+      _manualShareText = null;
       _offerCopy = false;
+      _offerRetry = false;
+      _offerLinkOnly = false;
+      _kakaoSerial += 1;
+      _acting = false;
+      _showCardNotice = false;
       _preparing = signature != null;
     });
     if (signature != null) {
-      _schedule(signature);
+      _armCardNotice(serial);
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted || serial != _captureSerial) {
+          return;
+        }
+        _capture(serial, signature);
+      });
     }
   }
 
-  void _schedule(String signature) {
-    final serial = ++_captureSerial;
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (!mounted || serial != _captureSerial) {
+  void _armCardNotice(int serial) {
+    _cardTimer?.cancel();
+    _cardTimer = Timer(pilotNoticeDelay, () {
+      if (!mounted || serial != _captureSerial || !_preparing) {
         return;
       }
-      _capture(serial, signature);
+      setState(() => _showCardNotice = true);
     });
   }
 
@@ -843,7 +878,7 @@ class _PilotSharePageState extends State<PilotSharePage> {
         context,
         card: card,
         assets: [
-          LifeTacticsArt.shareTemplate,
+          LifeTacticsArt.stadium,
           LifeTacticsArt.tacticsBoard,
           LifeTacticsArt.marker,
           card.saidaAsset,
@@ -852,17 +887,21 @@ class _PilotSharePageState extends State<PilotSharePage> {
       if (!mounted || serial != _captureSerial || signature != _signature) {
         return;
       }
+      _cardTimer?.cancel();
       setState(() {
         _png = bytes;
         _preparing = false;
+        _showCardNotice = false;
       });
     } catch (_) {
       if (!mounted || serial != _captureSerial) {
         return;
       }
+      _cardTimer?.cancel();
       setState(() {
         _png = null;
         _preparing = false;
+        _showCardNotice = false;
         _noticeKey = 'life_tactics.pilot.sharePrepareFailed';
       });
     }
@@ -873,15 +912,23 @@ class _PilotSharePageState extends State<PilotSharePage> {
     if (link == null || _acting) {
       return;
     }
-    if (pilotCanShareLink(link)) {
-      _shareWithSystem(link);
+    switch (_channel(link)) {
+      case _PilotShareChannel.kakao:
+        _shareWithKakao(link);
+      case _PilotShareChannel.link:
+        _shareWithSystem(link);
+      case null:
+        _showCopyOnly();
+    }
+  }
+
+  void _shareLinkOnly() {
+    final link = _link();
+    if (link == null || _acting) {
       return;
     }
-    if (pilotUsesKakaoShare(
-      systemShare: false,
-      kakaoTalk: pilotKakaoTalkBrowser(),
-    )) {
-      _shareWithKakao(link);
+    if (pilotCanShareLink(link)) {
+      _shareWithSystem(link);
       return;
     }
     _showCopyOnly();
@@ -892,7 +939,7 @@ class _PilotSharePageState extends State<PilotSharePage> {
     final pending = pilotShareLink(link);
     setState(() {
       _acting = true;
-      _manualUrl = null;
+      _manualShareText = null;
       _offerCopy = false;
       _clearShareNotice();
     });
@@ -906,12 +953,7 @@ class _PilotSharePageState extends State<PilotSharePage> {
       }
       if (result == PilotShareFileResult.cancelled ||
           result == PilotShareFileResult.opened) {
-        setState(() {
-          _acting = false;
-          _manualUrl = null;
-          _offerCopy = false;
-          _clearShareNotice();
-        });
+        _stayOnCard();
         return;
       }
       _showCopyOnly();
@@ -920,56 +962,109 @@ class _PilotSharePageState extends State<PilotSharePage> {
 
   void _shareWithKakao(PilotShareLink link) {
     final card = _visibleCard();
+    final signature = _signature;
     if (card == null) {
-      _showCopyOnly();
+      _showImageFallback();
       return;
     }
-    final code = AppLocaleScope.of(context).languageCode;
-    final serial = _captureSerial;
+    final filename = PilotShareFile.filenameFor(
+      resultTypeId: card.resultTypeId,
+      languageCode: AppLocaleScope.of(context).languageCode,
+    );
+    final serial = _kakaoSerial;
+    _acting = true;
     final pending = pilotSendKakao(
       PilotKakaoShare(
-        text: card.name,
+        title: pilotResultTitle(
+          quizTitle: card.quizTitle,
+          resultName: card.name,
+        ),
         buttonTitle: _bundleText(
           host.bundle!,
-          code,
+          AppLocaleScope.of(context).languageCode,
           'life_tactics.pilot.kakaoDiagnose',
         ),
         webUrl: link.url,
         mobileWebUrl: link.url,
+        imageUrl: link.url.resolve('/result-cards/$filename').toString(),
+        imageWidth: 0,
+        imageHeight: 0,
       ),
     );
     setState(() {
-      _acting = true;
-      _manualUrl = null;
+      _manualShareText = null;
       _offerCopy = false;
+      _offerRetry = false;
+      _offerLinkOnly = false;
       _clearShareNotice();
     });
-    pending.then((result) {
-      if (!mounted) {
+    pending.then((delivery) {
+      if (!_kakaoCurrent(serial, signature)) {
         return;
       }
-      if (serial != _captureSerial) {
-        setState(() => _acting = false);
-        return;
-      }
-      if (result == PilotShareFileResult.cancelled ||
-          result == PilotShareFileResult.opened) {
-        setState(() {
-          _acting = false;
-          _manualUrl = null;
-          _offerCopy = false;
-          _clearShareNotice();
-        });
-        return;
-      }
-      _showCopyOnly();
+      _applyKakao(delivery);
     });
+  }
+
+  bool _kakaoCurrent(int serial, String? signature) {
+    if (!mounted || serial != _kakaoSerial || signature != _signature) {
+      return false;
+    }
+    return true;
+  }
+
+  void _applyKakao(PilotKakaoDelivery delivery) {
+    if (delivery.result == PilotShareFileResult.cancelled ||
+        delivery.result == PilotShareFileResult.opened) {
+      setState(() {
+        _acting = false;
+        _offerRetry = false;
+        _offerLinkOnly = false;
+        _manualShareText = null;
+        _clearShareNotice();
+      });
+      return;
+    }
+    _showImageFallback();
+  }
+
+  void _stayOnCard() {
+    setState(() {
+      _acting = false;
+      _manualShareText = null;
+      _offerCopy = false;
+      _offerRetry = false;
+      _offerLinkOnly = false;
+      _clearShareNotice();
+    });
+  }
+
+  void _showImageFallback() {
+    setState(() {
+      _acting = false;
+      _manualShareText = null;
+      _offerCopy = false;
+      _offerRetry = true;
+      _offerLinkOnly = true;
+      _clearShareNotice();
+    });
+  }
+
+  _PilotShareChannel? _channel(PilotShareLink? link) {
+    if (pilotKakaoTalkBrowser()) {
+      return _PilotShareChannel.kakao;
+    }
+    final system = link != null && pilotCanShareLink(link);
+    if (system) {
+      return _PilotShareChannel.link;
+    }
+    return null;
   }
 
   void _showCopyOnly() {
     setState(() {
       _acting = false;
-      _manualUrl = null;
+      _manualShareText = null;
       _offerCopy = true;
       _clearShareNotice();
     });
@@ -983,7 +1078,8 @@ class _PilotSharePageState extends State<PilotSharePage> {
   }
 
   void _copyLink(PilotShareLink link, int serial) {
-    final pending = pilotCopyText(link.url.toString());
+    final message = '${link.text}\n${link.url}';
+    final pending = pilotCopyText(message);
     setState(() => _acting = true);
     pending.then((copied) {
       if (!mounted) {
@@ -997,11 +1093,11 @@ class _PilotSharePageState extends State<PilotSharePage> {
         _acting = false;
         if (copied) {
           _noticeKey = 'life_tactics.pilot.linkCopied';
-          _manualUrl = null;
+          _manualShareText = null;
           _offerCopy = false;
         } else {
           _noticeKey = null;
-          _manualUrl = link.url.toString();
+          _manualShareText = message;
           _offerCopy = true;
         }
       });
@@ -1020,7 +1116,7 @@ class _PilotSharePageState extends State<PilotSharePage> {
       }
       setState(() {
         _acting = false;
-        _manualUrl = null;
+        _manualShareText = null;
         _noticeKey = switch (result) {
           PilotSaveFileResult.failed => 'life_tactics.pilot.saveFailed',
           PilotSaveFileResult.opened => 'life_tactics.pilot.saveOpened',
@@ -1146,18 +1242,32 @@ class _PilotSharePageState extends State<PilotSharePage> {
     final bundle = host.bundle!;
     final code = AppLocaleScope.of(context).languageCode;
     final card = _visibleCard();
-    final fileReady = _png != null && !_acting;
     final link = _link();
-    final shareKey =
-        pilotUsesKakaoShare(
-          systemShare: link != null && pilotCanShareLink(link),
-          kakaoTalk: pilotKakaoTalkBrowser(),
-        )
-        ? 'life_tactics.pilot.kakaoShare'
-        : 'life_tactics.pilot.shareAction';
-    final notice = _noticeKey == null
+    final channel = _channel(link);
+    final fileReady = _png != null && !_acting;
+    final shareKey = _offerRetry
+        ? 'life_tactics.pilot.shareRetry'
+        : switch (channel) {
+            _PilotShareChannel.kakao => 'life_tactics.pilot.kakaoShare',
+            _PilotShareChannel.link || null => 'life_tactics.pilot.shareAction',
+          };
+    final shareEnabled = card != null && !_acting;
+    final statusKey =
+        _noticeKey ??
+        (_showCardNotice && _preparing
+            ? 'life_tactics.pilot.shareCardMaking'
+            : null);
+    final reservedLabels = channel == _PilotShareChannel.kakao
+        ? [
+            _bundleText(bundle, code, 'life_tactics.pilot.kakaoShare'),
+            _bundleText(bundle, code, 'life_tactics.pilot.kakaoPreparing'),
+            _bundleText(bundle, code, 'life_tactics.pilot.kakaoSend'),
+            _bundleText(bundle, code, 'life_tactics.pilot.shareRetry'),
+          ]
+        : const <String>[];
+    final notice = statusKey == null
         ? null
-        : _bundleText(bundle, code, _noticeKey!);
+        : _bundleText(bundle, code, statusKey);
     return PilotPlace(
       host: host,
       stage: PilotStage.share,
@@ -1171,6 +1281,20 @@ class _PilotSharePageState extends State<PilotSharePage> {
               _bundleText(bundle, code, 'life_tactics.pilot.unavailable'),
               key: const Key('pilot-error'),
             )
+          else if (samsungInternetBrowser())
+            Image.network(
+              Uri.base
+                  .resolve(
+                    'result-cards/${PilotShareFile.filenameFor(resultTypeId: card.resultTypeId, languageCode: code)}',
+                  )
+                  .toString(),
+              width: double.infinity,
+              fit: BoxFit.fitWidth,
+              webHtmlElementStrategy: WebHtmlElementStrategy.prefer,
+              semanticLabel:
+                  '${card.name}. ${card.formationTitle}. ${card.catchphrase}. ${card.description}',
+              errorBuilder: (context, error, stackTrace) => card,
+            )
           else
             card,
           const SizedBox(height: AppSpacing.sectionGap),
@@ -1181,7 +1305,8 @@ class _PilotSharePageState extends State<PilotSharePage> {
               code,
               'life_tactics.pilot.saveImage',
             ),
-            onShare: card != null && !_acting ? _share : null,
+            reservedLabels: reservedLabels,
+            onShare: shareEnabled ? _share : null,
             onSave: fileReady ? () => _save(_file()!) : null,
           ),
           if (notice != null) ...[
@@ -1192,6 +1317,14 @@ class _PilotSharePageState extends State<PilotSharePage> {
               style: AppTypography.rolesOf(context).secondary,
             ),
           ],
+          if (_offerLinkOnly)
+            TextButton(
+              key: const Key('pilot-share-link-only'),
+              onPressed: _acting || _link() == null ? null : _shareLinkOnly,
+              child: Text(
+                _bundleText(bundle, code, 'life_tactics.pilot.shareLinkOnly'),
+              ),
+            ),
           if (_offerCopy)
             TextButton(
               key: const Key('pilot-copy-link'),
@@ -1202,10 +1335,10 @@ class _PilotSharePageState extends State<PilotSharePage> {
                 _bundleText(bundle, code, 'life_tactics.pilot.copyLink'),
               ),
             ),
-          if (_manualUrl != null) ...[
+          if (_manualShareText != null) ...[
             const SizedBox(height: AppSpacing.inlineGap),
             SelectableText(
-              _manualUrl!,
+              _manualShareText!,
               key: const Key('pilot-share-link'),
               style: AppTypography.rolesOf(context).secondary,
             ),
@@ -1223,16 +1356,20 @@ class _PilotSharePageState extends State<PilotSharePage> {
   }
 }
 
+enum _PilotShareChannel { kakao, link }
+
 class _ShareActionButtons extends StatelessWidget {
   const _ShareActionButtons({
     required this.shareLabel,
     required this.saveLabel,
+    required this.reservedLabels,
     required this.onShare,
     required this.onSave,
   });
 
   final String shareLabel;
   final String saveLabel;
+  final List<String> reservedLabels;
   final VoidCallback? onShare;
   final VoidCallback? onSave;
 
@@ -1247,6 +1384,7 @@ class _ShareActionButtons extends StatelessWidget {
             key: const Key('pilot-share-action'),
             label: shareLabel,
             expand: expand,
+            reservedLabels: reservedLabels,
             onPressed: onShare,
           );
         }
@@ -1301,10 +1439,12 @@ class TacticsBoard extends StatelessWidget {
     required this.retryLabel,
     this.semanticsLabel,
     this.keyed = true,
+    this.showRetry = true,
   });
 
   final List<int> rows;
   final String retryLabel;
+  final bool showRetry;
 
   /// 포메이션을 한 번만 읽게 한다. 결과 화면은 보이는 글자가 그 역할을 한다.
   final String? semanticsLabel;
@@ -1334,6 +1474,7 @@ class TacticsBoard extends StatelessWidget {
                   asset: LifeTacticsArt.tacticsBoard,
                   fit: BoxFit.fill,
                   retryLabel: retryLabel,
+                  showRetry: showRetry,
                 ),
               ),
               Positioned.fill(
@@ -1414,7 +1555,6 @@ class LifeTacticsShareCard extends StatelessWidget {
     return LayoutBuilder(
       builder: (context, constraints) {
         final width = constraints.maxWidth;
-        final scaler = MediaQuery.textScalerOf(context);
         double px(double size) => size * width / 360;
         final family = AppTypography.rolesOf(context).body.fontFamily;
         TextStyle style(double size, FontWeight weight, Color color) {
@@ -1430,69 +1570,28 @@ class LifeTacticsShareCard extends StatelessWidget {
           );
         }
 
-        final textWidth = width * 0.86;
-        final gap = px(6);
-        final block =
-            _shareTextHeight(
-              name,
-              style(24, FontWeight.w800, AppColors.textPrimary),
-              textWidth,
-              scaler,
-            ) +
-            gap +
-            _shareTextHeight(
-              catchphrase,
-              style(14, FontWeight.w700, AppColors.primary),
-              textWidth,
-              scaler,
-            ) +
-            gap +
-            _shareTextHeight(
-              description,
-              style(12, FontWeight.w500, AppColors.textPrimary),
-              textWidth,
-              scaler,
-            );
-        final extra = block > width * 0.29 ? block - width * 0.29 : 0.0;
-        final height = width + extra;
         final saida = LifeTacticsArt.shareSaidaBox;
         final rows = LifeTacticsArt.markerRows(formation);
-        final showFullText = extra > 0;
         return SizedBox(
           key: Key(export ? 'pilot-share-export' : 'pilot-share-card'),
           width: width,
-          height: height,
           child: Stack(
             children: [
-              Positioned(
-                left: 0,
-                top: 0,
-                width: width,
-                height: width,
-                child: PilotImage(
-                  asset: LifeTacticsArt.shareTemplate,
-                  fit: BoxFit.fill,
-                  retryLabel: retryLabel,
-                ),
+              const Positioned.fill(
+                child: ColoredBox(color: AppColors.background),
               ),
-              Positioned(
-                left: width * LifeTacticsArt.shareStadiumMaskLeft,
-                top: width * LifeTacticsArt.shareStadiumMaskTop,
-                width: width * LifeTacticsArt.shareStadiumMaskWidth,
-                height: width * LifeTacticsArt.shareStadiumMaskHeight,
-                child: const ColoredBox(color: AppColors.background),
-              ),
-              Positioned(
-                left: width * LifeTacticsArt.shareBlurLeft,
-                top: width * LifeTacticsArt.shareBlurTop,
-                width: width * LifeTacticsArt.shareBlurWidth,
-                height: width * LifeTacticsArt.shareBlurHeight,
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(px(10)),
-                  child: PilotImage(
-                    asset: LifeTacticsArt.stadium,
-                    fit: BoxFit.cover,
-                    retryLabel: retryLabel,
+              Positioned.fill(
+                child: Padding(
+                  padding: EdgeInsets.all(width * 0.03),
+                  child: DecoratedBox(
+                    decoration: BoxDecoration(
+                      color: AppColors.background,
+                      border: Border.all(
+                        color: const Color(0xFFD7C6A9),
+                        width: px(1),
+                      ),
+                      borderRadius: BorderRadius.circular(px(14)),
+                    ),
                   ),
                 ),
               ),
@@ -1503,20 +1602,21 @@ class LifeTacticsShareCard extends StatelessWidget {
                 height: width * LifeTacticsArt.shareBlurHeight,
                 child: ClipRRect(
                   borderRadius: BorderRadius.circular(px(10)),
-                  child: BackdropFilter(
-                    filter: ui.ImageFilter.blur(sigmaX: px(3), sigmaY: px(3)),
-                    child: const SizedBox.expand(),
+                  child: ImageFiltered(
+                    imageFilter: ui.ImageFilter.blur(
+                      sigmaX: px(3),
+                      sigmaY: px(3),
+                      tileMode: ui.TileMode.clamp,
+                    ),
+                    child: PilotImage(
+                      asset: LifeTacticsArt.stadium,
+                      fit: BoxFit.cover,
+                      retryLabel: retryLabel,
+                      showRetry: !export,
+                    ),
                   ),
                 ),
               ),
-              if (showFullText)
-                Positioned(
-                  left: 0,
-                  right: 0,
-                  top: width * 0.96,
-                  bottom: 0,
-                  child: const ColoredBox(color: AppColors.background),
-                ),
               Positioned(
                 left: width * 0.07,
                 top: width * 0.045,
@@ -1573,6 +1673,8 @@ class LifeTacticsShareCard extends StatelessWidget {
                     fit: BoxFit.contain,
                     retryLabel: retryLabel,
                     semanticLabel: name,
+                    showRetry: !export,
+                    backdrop: null,
                   ),
                 ),
               ),
@@ -1612,55 +1714,62 @@ class LifeTacticsShareCard extends StatelessWidget {
                   retryLabel: retryLabel,
                   semanticsLabel: export ? null : formation,
                   keyed: !export,
+                  showRetry: !export,
                 ),
               ),
-              Positioned(
-                left: width * 0.07,
-                right: width * 0.07,
-                top: width * 0.62,
-                bottom: showFullText ? null : width * 0.09,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      name,
-                      key: export ? null : const Key('pilot-share-name'),
-                      maxLines: showFullText ? null : 2,
-                      overflow: showFullText
-                          ? TextOverflow.visible
-                          : TextOverflow.ellipsis,
-                      style: style(24, FontWeight.w800, AppColors.textPrimary),
-                    ),
-                    SizedBox(height: px(6)),
-                    Text(
-                      catchphrase,
-                      maxLines: showFullText ? null : 2,
-                      overflow: showFullText
-                          ? TextOverflow.visible
-                          : TextOverflow.ellipsis,
-                      style: style(14, FontWeight.w700, AppColors.primary),
-                    ),
-                    SizedBox(height: px(6)),
-                    Text(
-                      description,
-                      maxLines: showFullText ? null : 3,
-                      overflow: showFullText
-                          ? TextOverflow.visible
-                          : TextOverflow.ellipsis,
-                      style: style(12, FontWeight.w500, AppColors.textPrimary),
-                    ),
-                  ],
-                ),
-              ),
-              Positioned(
-                left: width * 0.07,
-                bottom: width * 0.032,
-                width: width * 0.34,
-                child: Text(
-                  studio,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: style(11, FontWeight.w600, AppColors.textSecondary),
+              ConstrainedBox(
+                constraints: BoxConstraints(minHeight: width),
+                child: Padding(
+                  padding: EdgeInsets.fromLTRB(
+                    width * 0.07,
+                    width * 0.62,
+                    width * 0.07,
+                    width * 0.045,
+                  ),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      Text(
+                        name,
+                        key: export ? null : const Key('pilot-share-name'),
+                        style: style(
+                          24,
+                          FontWeight.w800,
+                          AppColors.textPrimary,
+                        ),
+                      ),
+                      SizedBox(height: px(6)),
+                      Text(
+                        catchphrase,
+                        style: style(14, FontWeight.w700, AppColors.primary),
+                      ),
+                      SizedBox(height: px(6)),
+                      Text(
+                        description,
+                        style: style(
+                          12,
+                          FontWeight.w500,
+                          AppColors.textPrimary,
+                        ),
+                      ),
+                      SizedBox(height: px(6)),
+                      SizedBox(
+                        key: const Key('pilot-share-divider'),
+                        height: px(1),
+                        child: const ColoredBox(color: AppColors.border),
+                      ),
+                      SizedBox(height: px(8)),
+                      Text(
+                        studio,
+                        style: style(
+                          11,
+                          FontWeight.w600,
+                          AppColors.textSecondary,
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ],
@@ -1671,22 +1780,6 @@ class LifeTacticsShareCard extends StatelessWidget {
   }
 }
 
-double _shareTextHeight(
-  String text,
-  TextStyle style,
-  double maxWidth,
-  TextScaler scaler, {
-  int? maxLines,
-}) {
-  final painter = TextPainter(
-    text: TextSpan(text: text, style: style),
-    textDirection: TextDirection.ltr,
-    textScaler: scaler,
-    maxLines: maxLines,
-  )..layout(maxWidth: maxWidth);
-  return painter.size.height;
-}
-
 class PilotImage extends StatefulWidget {
   const PilotImage({
     super.key,
@@ -1694,12 +1787,20 @@ class PilotImage extends StatefulWidget {
     required this.retryLabel,
     this.fit = BoxFit.contain,
     this.semanticLabel,
+    this.showRetry = true,
+    this.backdrop = AppColors.background,
   });
 
   final String asset;
   final String retryLabel;
   final BoxFit fit;
   final String? semanticLabel;
+
+  /// 저장용 카드와 묶음 로딩은 재시도 버튼을 그림 안에 넣지 않는다.
+  final bool showRetry;
+
+  /// 비어 있으면 그림의 투명 영역을 그대로 둔다.
+  final Color? backdrop;
 
   @override
   State<PilotImage> createState() => _PilotImageState();
@@ -1711,15 +1812,44 @@ class _PilotImageState extends State<PilotImage> {
   @override
   Widget build(BuildContext context) {
     if (widget.asset.isEmpty) {
-      return _retry();
+      return _fallback();
     }
-    return Image.asset(
-      widget.asset,
-      key: ValueKey('${widget.asset}-$_attempt'),
-      fit: widget.fit,
-      semanticLabel: widget.semanticLabel,
-      errorBuilder: (context, error, stackTrace) => _retry(),
-    );
+    final useBrowserImage =
+        samsungInternetBrowser() &&
+        context.findAncestorWidgetOfExactType<LifeTacticsShareCard>() == null;
+    final image = useBrowserImage
+        ? Image.network(
+            Uri.base.resolve('assets/${widget.asset}').toString(),
+            key: ValueKey('${widget.asset}-$_attempt'),
+            webHtmlElementStrategy: WebHtmlElementStrategy.prefer,
+            fit: widget.fit,
+            semanticLabel: widget.semanticLabel,
+            errorBuilder: (context, error, stackTrace) => _fallback(),
+          )
+        : Image.asset(
+            widget.asset,
+            key: ValueKey('${widget.asset}-$_attempt'),
+            fit: widget.fit,
+            gaplessPlayback: true,
+            semanticLabel: widget.semanticLabel,
+            errorBuilder: (context, error, stackTrace) => _fallback(),
+          );
+    final backdrop = widget.backdrop;
+    if (backdrop == null) {
+      return image;
+    }
+    return ColoredBox(color: backdrop, child: image);
+  }
+
+  Widget _fallback() {
+    if (!widget.showRetry) {
+      final backdrop = widget.backdrop;
+      if (backdrop == null) {
+        return const SizedBox.expand();
+      }
+      return ColoredBox(color: backdrop, child: const SizedBox.expand());
+    }
+    return _retry();
   }
 
   Widget _retry() {
@@ -1998,6 +2128,7 @@ class _ResultLine extends StatelessWidget {
     required this.rows,
     required this.labels,
     required this.retryLabel,
+    required this.loadingLabel,
   });
 
   final String asset;
@@ -2005,6 +2136,7 @@ class _ResultLine extends StatelessWidget {
   final List<int> rows;
   final List<String> labels;
   final String retryLabel;
+  final String loadingLabel;
 
   @override
   Widget build(BuildContext context) {
@@ -2026,48 +2158,89 @@ class _ResultLine extends StatelessWidget {
               constraints.maxWidth,
             );
         final boardHeight = boardWidth / 0.8;
-        return SizedBox(
-          key: const Key('pilot-result-line'),
-          width: constraints.maxWidth,
-          height: boardHeight,
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              SizedBox(
-                width: saidaWidth,
-                height: boardHeight,
-                child: Center(
-                  child: SizedBox(
-                    key: Key('pilot-saida-asset:$asset'),
-                    width: saidaWidth,
-                    height: saidaWidth,
-                    child: PilotImage(
-                      asset: asset,
-                      fit: BoxFit.contain,
-                      retryLabel: retryLabel,
-                      semanticLabel: name,
-                    ),
+        return PilotImageGroup(
+          assets: [asset, LifeTacticsArt.tacticsBoard, LifeTacticsArt.marker],
+          builder: (context, phase) {
+            return SizedBox(
+              key: const Key('pilot-result-line'),
+              width: constraints.maxWidth,
+              height: boardHeight,
+              child: Stack(
+                children: [
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      SizedBox(
+                        width: saidaWidth,
+                        height: boardHeight,
+                        child: Center(
+                          child: SizedBox(
+                            key: Key('pilot-saida-asset:$asset'),
+                            width: saidaWidth,
+                            height: saidaWidth,
+                            child: PilotImage(
+                              asset: asset,
+                              fit: BoxFit.contain,
+                              retryLabel: retryLabel,
+                              semanticLabel: name,
+                              showRetry: false,
+                            ),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: gap),
+                      SizedBox(
+                        width: labelWidth,
+                        height: boardHeight,
+                        child: _FormationLabels(
+                          labels: labels,
+                          style: style,
+                          singleLine: true,
+                        ),
+                      ),
+                      const SizedBox(width: gap),
+                      SizedBox(
+                        width: boardWidth,
+                        height: boardHeight,
+                        child: TacticsBoard(
+                          rows: rows,
+                          retryLabel: retryLabel,
+                          showRetry: false,
+                        ),
+                      ),
+                    ],
                   ),
-                ),
+                  if (!phase.ready)
+                    Positioned.fill(
+                      child: ColoredBox(
+                        key: const Key('pilot-result-image-cover'),
+                        color: AppColors.background,
+                        child: phase.failed
+                            ? Center(
+                                child: AppButton(
+                                  key: const Key('pilot-result-image-retry'),
+                                  label: retryLabel,
+                                  variant: AppButtonVariant.secondary,
+                                  expand: false,
+                                  onPressed: phase.retry,
+                                ),
+                              )
+                            : phase.showNotice
+                            ? Center(
+                                child: Text(
+                                  loadingLabel,
+                                  key: const Key('pilot-result-image-status'),
+                                  textAlign: TextAlign.center,
+                                  style: style,
+                                ),
+                              )
+                            : const SizedBox.expand(),
+                      ),
+                    ),
+                ],
               ),
-              const SizedBox(width: gap),
-              SizedBox(
-                width: labelWidth,
-                height: boardHeight,
-                child: _FormationLabels(
-                  labels: labels,
-                  style: style,
-                  singleLine: true,
-                ),
-              ),
-              const SizedBox(width: gap),
-              SizedBox(
-                width: boardWidth,
-                height: boardHeight,
-                child: TacticsBoard(rows: rows, retryLabel: retryLabel),
-              ),
-            ],
-          ),
+            );
+          },
         );
       },
     );

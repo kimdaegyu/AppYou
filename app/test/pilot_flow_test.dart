@@ -645,7 +645,7 @@ void main() {
                   quizTitle: '나의 인생 전술',
                   formation: '4-4-2',
                   name: '인생의 올라운더',
-                  catchphrase: '오늘은 세 포지션 모두 내 자리!',
+                  catchphrase: '오늘은 세 포지션 모두 제 자리예요!',
                   description: '이번 응답에서는 세 성향의 간격이 작았어요.',
                   studio: 'D.CStudio',
 
@@ -1103,8 +1103,8 @@ void main() {
             .asset,
         LifeTacticsArt.wink,
       );
-      expect(find.text('축구에 여러 전술이 있듯, 삶에도 여러 길이 있어.'), findsOneWidget);
-      expect(find.text('누구나 좋은 삶을 살 수 있어.'), findsOneWidget);
+      expect(find.text('축구에 여러 전술이 있듯, 삶에도 여러 길이 있어요.'), findsOneWidget);
+      expect(find.text('누구나 좋은 삶을 살 수 있어요.'), findsOneWidget);
       final line = tester.widget<Text>(
         find.byKey(const Key('pilot-closing-line')),
       );
@@ -1171,8 +1171,8 @@ void main() {
           .data;
       expect(other, isNot(balanced));
       expect(find.byKey(const Key('pilot-closing')), findsOneWidget);
-      expect(find.text('축구에 여러 전술이 있듯, 삶에도 여러 길이 있어.'), findsOneWidget);
-      expect(find.text('누구나 좋은 삶을 살 수 있어.'), findsOneWidget);
+      expect(find.text('축구에 여러 전술이 있듯, 삶에도 여러 길이 있어요.'), findsOneWidget);
+      expect(find.text('누구나 좋은 삶을 살 수 있어요.'), findsOneWidget);
 
       await controller.select('en');
       await tester.pump();
@@ -1181,8 +1181,8 @@ void main() {
         findsOneWidget,
       );
       expect(find.text('Anyone can live a good life.'), findsOneWidget);
-      expect(find.text('축구에 여러 전술이 있듯, 삶에도 여러 길이 있어.'), findsNothing);
-      expect(find.text('누구나 좋은 삶을 살 수 있어.'), findsNothing);
+      expect(find.text('축구에 여러 전술이 있듯, 삶에도 여러 길이 있어요.'), findsNothing);
+      expect(find.text('누구나 좋은 삶을 살 수 있어요.'), findsNothing);
       expect(
         tester.widget<Text>(find.byKey(const Key('pilot-description'))).data,
         isNot(other),
@@ -1205,7 +1205,7 @@ void main() {
         findsNothing,
       );
       expect(find.text('Anyone can live a good life.'), findsNothing);
-      expect(find.text('축구에 여러 전술이 있듯, 삶에도 여러 길이 있어.'), findsNothing);
+      expect(find.text('축구에 여러 전술이 있듯, 삶에도 여러 길이 있어요.'), findsNothing);
       final preview = tester.widget<LifeTacticsShareCard>(
         find.byType(LifeTacticsShareCard),
       );
