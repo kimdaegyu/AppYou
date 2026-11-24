@@ -18,10 +18,26 @@
 
   <meta charset="UTF-8">
   <meta name="color-scheme" content="only light">
+  <script>
+    // Samsung Internet can apply automatic darkening to images on light-only pages.
+    if (/SamsungBrowser\//i.test(navigator.userAgent)) {
+      document.documentElement.classList.add('samsung-internet');
+      document.querySelector('meta[name="color-scheme"]').content = 'light dark';
+    }
+  </script>
   <style>
     :root {
       color-scheme: only light;
       background-color: #fff9f2;
+    }
+    :root.samsung-internet {
+      color-scheme: light dark;
+    }
+    @media (prefers-color-scheme: dark) {
+      .samsung-internet body {
+        background-color: #fff9f2;
+        color: #4a2e1e;
+      }
     }
   </style>
   <meta content="IE=Edge" http-equiv="X-UA-Compatible">
